@@ -1,0 +1,22 @@
+{
+  "name": "@cache-crypto-widget/hardhat",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "accounts": "hardhat accounts",
+    "chain": "hardhat node",
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test --network hardhat",
+    "verify": "hardhat verify"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.1",
+    "dotenv": "^16.0.1",
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.2"
+  }
+}

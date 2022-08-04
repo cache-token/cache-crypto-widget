@@ -1,0 +1,28 @@
+{
+  "name": "cache-crypto-widget",
+  "version": "1.0.0",
+  "repository": "https://github.com/cache-token/cache-crypto-widget.git",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "accounts": "npm run accounts -w @cache-crypto-widget/hardhat",
+    "chain": "npm run chain -w @cache-crypto-widget/hardhat",
+    "clean": "npm run clean -w @cache-crypto-widget/hardhat",
+    "compile": "npm run compile -w @cache-crypto-widget/hardhat",
+    "coverage": "npm run coverage -w @cache-crypto-widget/hardhat",
+    "test": "npm run test -w @cache-crypto-widget/hardhat",
+    "verify": "npm run verify -w @cache-crypto-widget/hardhat"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/hardhat",
+      "**/hardhat/**"
+    ]
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.4.2"
+  }
+}
