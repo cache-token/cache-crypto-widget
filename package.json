@@ -23,6 +23,7 @@
     ]
   },
   "dependencies": {
-    "@chainlink/contracts": "^0.4.2"
+    "@chainlink/contracts": "^0.4.2",
+    "@uniswap/v3-periphery": "^1.4.1"
   }
 }

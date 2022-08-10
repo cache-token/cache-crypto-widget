@@ -1,23 +1,57 @@
+import fs from 'fs';
+import * as hre from "hardhat";
 import { ethers } from "hardhat";
+import { Contract } from 'ethers';
+import { WrapperContract } from "../typechain-types";
+import { ContractAddresses, SwapRouterAddress } from "../Addresses";
+
+const margin = 50;
+const deployNetwork = "mainnet";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const _Wrapper = await ethers.getContractFactory("WrapperContract");
+  const wrapper = await _Wrapper.deploy(
+      margin,
+      ContractAddresses[deployNetwork].XAU_USD_PriceFeed,
+      ContractAddresses[deployNetwork].CGT_Address,
+      ContractAddresses[deployNetwork].USDC_Address,
+      SwapRouterAddress
+    ) as WrapperContract;
+  await wrapper.deployed();
 
-  const lockedAmount = ethers.utils.parseEther("1");
-
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log("Lock with 1 ETH deployed to:", lock.address);
+  console.log("WrapperContract deployed to:", wrapper.address);
+  return {
+    'WrapperContract': wrapper
+  }
 }
+
+async function verify(contractAddress:string, ...args:Array<any>) {
+  console.log("verifying", contractAddress, ...args);
+  await hre.run("verify:verify", {
+    address: contractAddress,
+    constructorArguments: [
+      ...args
+    ],
+  });
+};
+
+function saveFrontendFiles(contract: Contract, contractName: string) {
+  console.log('Adding to frontend', contractName)
+  fs.appendFileSync(
+    `./contractAddress.ts`,
+    `export const ${contractName} = '${contract.address}'\n`
+  );
+};
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+main()
+.then(async(deployedData) => {
+  // await verify(deployedData.WrapperContract.address);
+  saveFrontendFiles(deployedData.WrapperContract, 'WrapperContract');
+  process.exit(0);
+})
+.catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  process.exit(1);
 });
