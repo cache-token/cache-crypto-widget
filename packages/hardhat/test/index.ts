@@ -21,7 +21,7 @@ describe("Wrapper contract test", function() {
       xTokenHolder: Signer,
       wrapper: WrapperContract,
       cacheGold: ERC20,
-      USDC: ERC20,
+      stable: ERC20,
       xToken: ERC20;
 
   const fixture = async () => {
@@ -30,8 +30,8 @@ describe("Wrapper contract test", function() {
     const _CacheGold = await ethers.getContractFactory("ERC20");
     cacheGold = _CacheGold.attach(CGT_Address);
 
-    const _USDC = await ethers.getContractFactory("ERC20");
-    USDC = _USDC.attach(USDC_Address);
+    const _Stable = await ethers.getContractFactory("ERC20");
+    stable = _Stable.attach(USDC_Address);
 
     const _XToken = await ethers.getContractFactory("ERC20");
     xToken = _XToken.attach(ContractAddresses[testNetwork].XToken_Address);
@@ -74,7 +74,7 @@ describe("Wrapper contract test", function() {
   it('1. wrapper contract params are set correctly', async function () {
     expect(await wrapper.margin()).to.equal(margin);
     expect(await wrapper.CGT()).to.equal(CGT_Address);
-    expect(await wrapper.USDC()).to.equal(USDC_Address);
+    expect(await wrapper.stable()).to.equal(USDC_Address);
   });
 
   it('2. XAU-USD price feed works', async function () {
@@ -84,10 +84,20 @@ describe("Wrapper contract test", function() {
     expect(price.toNumber() / 10**8).to.be.above(1700);
   });
 
-  it('3. tokens can be swapped for CGT', async function () {
+  it('3. setters for margin and stable work correctly', async function () {
+    const newMargin = 100;
+    const newStable = "0x4AEE91e7D6c6e0c4C0ec10b9757B8D19ab7F427C";
+    await wrapper.setMargin(newMargin);
+    await wrapper.setStable(newStable);
+
+    expect(await wrapper.margin()).to.equal(newMargin);
+    expect(await wrapper.stable()).to.equal(newStable);
+  });
+
+  it('4. tokens can be swapped for CGT', async function () {
     const amount = 10;
     const initialCGTBalance = (await cacheGold.balanceOf(await xTokenHolder.getAddress())).toNumber();
-    const initialUSDCBalance = (await USDC.balanceOf(wrapper.address)).toNumber();
+    const initialUSDCBalance = (await stable.balanceOf(wrapper.address)).toNumber();
 
     await xToken.connect(xTokenHolder).approve(
       wrapper.address,
@@ -102,19 +112,19 @@ describe("Wrapper contract test", function() {
     )).to.emit(wrapper, 'SwappedTokensForCGT');
 
     const finalCGTBalance = (await cacheGold.balanceOf(await xTokenHolder.getAddress())).toNumber();
-    const finalUSDCBalance = (await USDC.balanceOf(wrapper.address)).toNumber();
+    const finalUSDCBalance = (await stable.balanceOf(wrapper.address)).toNumber();
 
     expect(
       (finalCGTBalance - initialCGTBalance) / 10 ** (await cacheGold.decimals())
     ).to.be.above(0);
     expect(
-      (finalUSDCBalance - initialUSDCBalance) / 10 ** (await USDC.decimals())
+      (finalUSDCBalance - initialUSDCBalance) / 10 ** (await stable.decimals())
     ).to.be.above(0);
   });
 
-  it('4. owner can claim USDC tokens from the contract', async function () {
+  it('5. owner can claim stabletokens from the contract', async function () {
     const amount = 10;
-    const initialUSDCBalance = (await USDC.balanceOf(await deployer.getAddress())).toNumber();
+    const initialUSDCBalance = (await stable.balanceOf(await deployer.getAddress())).toNumber();
 
     await xToken.connect(xTokenHolder).approve(
       wrapper.address,
@@ -128,18 +138,18 @@ describe("Wrapper contract test", function() {
       0
     );
 
-    const USDCAmountCollected = (await USDC.balanceOf(wrapper.address)).toNumber();
+    const stableAmountCollected = (await stable.balanceOf(wrapper.address)).toNumber();
     await wrapper.withdrawTokens(USDC_Address);
-    const finalUSDCBalance = (await USDC.balanceOf(await deployer.getAddress())).toNumber();
+    const finalUSDCBalance = (await stable.balanceOf(await deployer.getAddress())).toNumber();
     expect(
       finalUSDCBalance - initialUSDCBalance
-    ).to.equal(USDCAmountCollected);
+    ).to.equal(stableAmountCollected);
   });
 
-  it('5. contract correctly quotes CGT amount received', async function () {
+  it('6. contract correctly quotes CGT amount out', async function () {
     const amount = 10;
     const price = (await wrapper.getLatestXAU_USDPrice()).toNumber() / 10 ** 8;
-    const quote = await wrapper.quoteCGTAmountReceived(amount * (10 ** await USDC.decimals()));
+    const quote = await wrapper.quoteCGTAmountReceived(amount * (10 ** await stable.decimals()));
     expect(
       parseFloat((quote.toNumber() / (10 ** await cacheGold.decimals())).toFixed(await cacheGold.decimals()))
     ).to.equal(
@@ -147,7 +157,7 @@ describe("Wrapper contract test", function() {
     );
   });
 
-  it('6. swap reverts for invalid params', async function () {
+  it('7. swap reverts for invalid params', async function () {
     const amount = 10;
     await xToken.connect(xTokenHolder).approve(
       wrapper.address,
@@ -178,6 +188,49 @@ describe("Wrapper contract test", function() {
       0,
       0
     )).to.be.revertedWith("STF");
+  });
+
+  it('8. swaps can be paused by the owner', async function () {
+    const amount = 10;
+    await xToken.connect(xTokenHolder).approve(
+      wrapper.address,
+      ethers.utils.parseEther(amount.toString())
+    );
+
+    await wrapper.pause();
+    await expect(wrapper.connect(xTokenHolder).swapTokensForCGT(
+      ContractAddresses[testNetwork].XToken_Address,
+      3000,
+      ethers.utils.parseEther(amount.toString()).div(10 ** (18 - await xToken.decimals())),
+      0,
+      0
+    )).to.be.revertedWith("Pausable: paused");
+  });
+
+  it('9. swaps can be unpaused by the owner', async function () {
+    const amount = 10;
+    await xToken.connect(xTokenHolder).approve(
+      wrapper.address,
+      ethers.utils.parseEther(amount.toString())
+    );
+
+    await wrapper.pause();
+    await expect(wrapper.connect(xTokenHolder).swapTokensForCGT(
+      ContractAddresses[testNetwork].XToken_Address,
+      3000,
+      ethers.utils.parseEther(amount.toString()).div(10 ** (18 - await xToken.decimals())),
+      0,
+      0
+    )).to.be.revertedWith("Pausable: paused");
+
+    await wrapper.unpause();
+    await expect(wrapper.connect(xTokenHolder).swapTokensForCGT(
+      ContractAddresses[testNetwork].XToken_Address,
+      3000,
+      ethers.utils.parseEther(amount.toString()).div(10 ** (18 - await xToken.decimals())),
+      0,
+      0
+    )).to.emit(wrapper, 'SwappedTokensForCGT');
   });
 });
 

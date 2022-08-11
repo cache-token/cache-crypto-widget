@@ -4,6 +4,7 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
@@ -13,16 +14,16 @@ import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 /// @title CACHE-Widget Wrapper Contract
 /// @notice Contract to swap ERC20 tokens for CGT based on Chainlink XAU price feed
 /// @dev Contract uses UniswapV3 SwapRouter and Chainlink data feed
-contract WrapperContract is Ownable {
+contract WrapperContract is Ownable, Pausable {
     AggregatorV3Interface internal priceFeed;
 
     // margin in basis points
     uint16 public margin;
-    // fees collected in USDC
+    // fees collected in stable tokens
     uint256 public totalFeesCollected;
 
+    IERC20 public stable;
     IERC20 public immutable CGT;
-    IERC20 public immutable USDC;
     ISwapRouter public immutable swapRouter;
 
     event SwappedTokensForCGT(
@@ -32,24 +33,24 @@ contract WrapperContract is Ownable {
     );
 
     /**
-     * @dev Set margin, datafeed, CGT, USDC and SwapRouter
+     * @dev Set margin, datafeed, CGT, stable and SwapRouter
      */
     constructor(
         uint16 _margin,
         address _dataFeedAddress,
         IERC20 _CGT,
-        IERC20 _USDC,
+        IERC20 _stable,
         ISwapRouter _swapRouter
     ) {
         require(_dataFeedAddress != address(0), "Invalid datafeed address");
         require(address(_CGT) != address(0), "Invalid CGT address");
-        require(address(_USDC) != address(0), "Invalid USDC address");
+        require(address(_stable) != address(0), "Invalid stabletoken address");
         require(address(_swapRouter) != address(0), "Invalid SwapRouter address");
 
         margin = _margin;
         priceFeed = AggregatorV3Interface(_dataFeedAddress);
         CGT = _CGT;
-        USDC = _USDC;
+        stable = _stable;
         swapRouter = _swapRouter;
     }
 
@@ -58,22 +59,42 @@ contract WrapperContract is Ownable {
         margin = _margin;
     }
 
+    /// @notice Sets new stable token
+    function setStable(IERC20 _stable) external onlyOwner {
+        stable = _stable;
+    }
+
+    /// @notice Pause token swaps
+    function pause() external onlyOwner {
+        _requireNotPaused();
+        _pause();
+    }
+
+    /// @notice Unpause token swaps
+    function unpause() external onlyOwner {
+        _requirePaused();
+        _unpause();
+    }
+
     /**
      * @notice Swap ERC20 tokens for CGT
-     * @dev Uses UniswapV3 SwapRouter to swap tokens for USDC
+     * @dev Uses UniswapV3 SwapRouter to swap tokens for stabletokens
      * @param tokenIn address of input ERC20 token
      * @param poolFee fees of the Uniswap pool in basis points
      * @param amountIn input amount of ERC20 tokens
-     * @param USDCAmountOutMinimum mininmum output amount of USDC tokens
+     * @param stableAmountOutMinimum mininmum output amount of stable tokens
      * @param sqrtPriceLimitX96 Uniswap pool price change parameter
      */
     function swapTokensForCGT(
         address tokenIn,
         uint24 poolFee,
         uint256 amountIn,
-        uint256 USDCAmountOutMinimum,
+        uint256 stableAmountOutMinimum,
         uint160 sqrtPriceLimitX96
-    ) external {
+    ) 
+        external 
+        whenNotPaused
+    {
         require(tokenIn != address(0), "Invalid token address");
         require(amountIn > 0, "Invalid amount");
 
@@ -83,41 +104,41 @@ contract WrapperContract is Ownable {
         ISwapRouter.ExactInputSingleParams memory params =
             ISwapRouter.ExactInputSingleParams({
                 tokenIn: tokenIn,
-                tokenOut: address(USDC),
+                tokenOut: address(stable),
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,
                 amountIn: amountIn,
-                amountOutMinimum: USDCAmountOutMinimum,
+                amountOutMinimum: stableAmountOutMinimum,
                 sqrtPriceLimitX96: sqrtPriceLimitX96
             });
         uint256 amountOut = swapRouter.exactInputSingle(params);
         totalFeesCollected += (amountOut * margin) / 10000;
-        uint256 netUSDCAmount = (amountOut * (10000 - margin)) / 10000;
-        uint256 CGTAmount = ((netUSDCAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
+        uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
+        uint256 CGTAmount = ((netStableTokenAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
     }
 
     /// @notice Transfers tokens from the contract to the owner
-    function withdrawTokens(address tokenAddress) external onlyOwner {
-        require(tokenAddress != address(0), "Invalid token address");
-        IERC20(tokenAddress).transfer(
+    function withdrawTokens(IERC20 token) external onlyOwner {
+        require(address(token) != address(0), "Invalid token address");
+        token.transfer(
             owner(), 
-            IERC20(tokenAddress).balanceOf(address(this))
+            token.balanceOf(address(this))
         );
     }
 
     /**
      * @notice Calculate estimated amount of CGT received
      * @dev Uses Chainlink XAU price feed
-     * @param USDC_AmountIn input amount of USDC tokens
+     * @param stableAmountIn input amount of stable tokens
      * @return estimated CGT amount out
      */
-    function quoteCGTAmountReceived(uint256 USDC_AmountIn) external view returns (uint256) {
-        uint256 netUSDCAmount = (USDC_AmountIn * (10000 - margin)) / 10000;
-        uint256 CGTAmount = ((netUSDCAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
+    function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
+        uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
+        uint256 CGTAmount = ((netStableTokenAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
         return CGTAmount;
     }
 
