@@ -106,9 +106,7 @@ export default function TokenModal({ isOpen, onClose }: Props) {
                           id={val.name}
                           style={{
                             backgroundColor:
-                              val.name === window.__selected
-                                ? 'greenyellow'
-                                : '',
+                              val.name === window.__selected ? '#fbd03b' : '',
                           }}
                           hidden={hidden}
                           onClick={function (e) {
@@ -129,7 +127,7 @@ export default function TokenModal({ isOpen, onClose }: Props) {
                       </>
                     );
                   })
-                  .slice(0, 10)}
+                  .slice(0, 8)}
               </tbody>
             </table>
           </div>
@@ -142,9 +140,9 @@ export default function TokenModal({ isOpen, onClose }: Props) {
           borderBottomRightRadius="3xl"
           p={6}
         >
-          <Text color="black" fontWeight="medium" fontSize="md">
+          {/* <Text color="black" fontWeight="medium" fontSize="md">
             Manage Token List
-          </Text>
+          </Text> */}
         </ModalFooter>
       </ModalContent>
     </Modal>

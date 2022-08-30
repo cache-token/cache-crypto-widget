@@ -18,25 +18,25 @@ export default function SwapButton() {
     window.__selected ? (
       <Box mt="0.5rem">
         <Button
-          color="white"
-          bg="rgb(255,140,0)"
+          color="black"
+          bg="#fbd03b"
           width="100%"
           p="1.62rem"
           borderRadius="1.25rem"
-          _hover={{ bg: 'rgb(255,165,0)' }}
+          _hover={{ bg: '#fbd03bbf' }}
         >
-          Swap
+          SWAP
         </Button>
       </Box>
     ) : (
       <Box mt="0.5rem">
         <Button
-          color="white"
-          bg="rgb(255,140,0)"
+          color="black"
+          bg="#fbd03b"
           width="100%"
           p="1.62rem"
           borderRadius="1.25rem"
-          _hover={{ bg: 'rgb(255,165,0)' }}
+          _hover={{ bg: '#fbd03bbf' }}
         >
           Please select token
         </Button>
@@ -46,12 +46,12 @@ export default function SwapButton() {
     <Box mt="0.5rem">
       <Button
         onClick={handleConnectWallet}
-        color="white"
-        bg="rgb(255,140,0)"
+        color="black"
+        bg="#fbd03b"
         width="100%"
         p="1.62rem"
         borderRadius="1.25rem"
-        _hover={{ bg: 'rgb(255,165,0)' }}
+        _hover={{ bg: '#fbd03bbf' }}
       >
         Connect Wallet
       </Button>

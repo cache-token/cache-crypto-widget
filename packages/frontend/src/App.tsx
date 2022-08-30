@@ -13,11 +13,12 @@ function App() {
 
   return (
     <ChakraProvider theme={theme}>
-      <Header>
+      {/* <Header>
         <ConnectButton handleOpenModal={onOpen} />
         <AccountModal isOpen={isOpen} onClose={onClose} />
-      </Header>
-      <Swap />
+      </Header> */}
+      <Swap handleOpenModal={onOpen} />
+      <AccountModal isOpen={isOpen} onClose={onClose} />
       {/* <Test /> */}
     </ChakraProvider>
   );
