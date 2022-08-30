@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from "fs";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { Contract } from 'ethers';
+import { Contract } from "ethers";
 import { WrapperContract } from "../typechain-types";
 import { ContractAddresses, SwapRouterAddress } from "../Addresses";
 
@@ -10,48 +10,46 @@ const deployNetwork = "mainnet";
 
 async function main() {
   const _Wrapper = await ethers.getContractFactory("WrapperContract");
-  const wrapper = await _Wrapper.deploy(
-      margin,
-      ContractAddresses[deployNetwork].XAU_USD_PriceFeed,
-      ContractAddresses[deployNetwork].CGT_Address,
-      ContractAddresses[deployNetwork].USDC_Address,
-      SwapRouterAddress
-    ) as WrapperContract;
+  const wrapper = (await _Wrapper.deploy(
+    margin,
+    ContractAddresses[deployNetwork].XAU_USD_PriceFeed,
+    ContractAddresses[deployNetwork].CGT_Address,
+    ContractAddresses[deployNetwork].USDC_Address,
+    SwapRouterAddress
+  )) as WrapperContract;
   await wrapper.deployed();
 
   console.log("WrapperContract deployed to:", wrapper.address);
   return {
-    'WrapperContract': wrapper
-  }
+    WrapperContract: wrapper,
+  };
 }
 
-async function verify(contractAddress:string, ...args:Array<any>) {
+async function verify(contractAddress: string, ...args: Array<any>) {
   console.log("verifying", contractAddress, ...args);
   await hre.run("verify:verify", {
     address: contractAddress,
-    constructorArguments: [
-      ...args
-    ],
+    constructorArguments: [...args],
   });
-};
+}
 
 function saveFrontendFiles(contract: Contract, contractName: string) {
-  console.log('Adding to frontend', contractName)
+  console.log("Adding to frontend", contractName);
   fs.appendFileSync(
-    `./contractAddress.ts`,
+    `../frontend/src/contractAddress.ts`,
     `export const ${contractName} = '${contract.address}'\n`
   );
-};
+}
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-.then(async(deployedData) => {
-  // await verify(deployedData.WrapperContract.address);
-  saveFrontendFiles(deployedData.WrapperContract, 'WrapperContract');
-  process.exit(0);
-})
-.catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+  .then(async (deployedData) => {
+    // await verify(deployedData.WrapperContract.address);
+    saveFrontendFiles(deployedData.WrapperContract, "WrapperContract");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
