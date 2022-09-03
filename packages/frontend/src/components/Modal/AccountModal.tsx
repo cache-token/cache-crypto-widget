@@ -32,21 +32,15 @@ export default function AccountModal({ isOpen, onClose }: Props) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="md">
       <ModalOverlay />
-      <ModalContent
-        background="white"
-        border="0.06rem"
-        borderStyle="solid"
-        borderColor="gray.300"
-        borderRadius="3xl"
-      >
-        <ModalHeader color="black" px={4} fontSize="lg" fontWeight="medium">
+      <ModalContent background="#191b1f" border="none" borderRadius="3xl">
+        <ModalHeader color="white" px={4} fontSize="lg" fontWeight="medium">
           Account
         </ModalHeader>
         <ModalCloseButton
-          color="black"
+          color="white"
           fontSize="sm"
           _hover={{
-            color: 'gray.600',
+            color: '#eee',
           }}
         />
         <ModalBody pt={0} px={4}>
@@ -61,7 +55,7 @@ export default function AccountModal({ isOpen, onClose }: Props) {
             mb={3}
           >
             <Flex justifyContent="space-between" alignItems="center" mb={3}>
-              <Text color="rgb(110, 114, 125);" fontSize="sm">
+              <Text color="rgb(110, 114, 105);" fontSize="sm">
                 Connected with MetaMask
               </Text>
               <Button
@@ -71,13 +65,13 @@ export default function AccountModal({ isOpen, onClose }: Props) {
                 fontSize="0.81rem"
                 fontWeight="normal"
                 borderColor="rgb(236, 236, 236)"
-                color="rgb(213, 0, 102)"
+                color="white"
                 px={2}
                 h="1.62rem"
                 _hover={{
                   background: 'none',
-                  borderColor: 'rgb(213, 0, 102)',
-                  textDecoration: 'underline',
+                  borderColor: 'gray',
+                  textDecoration: 'none',
                 }}
                 // onClick={handleDeactivateAccount}
               >
@@ -87,7 +81,7 @@ export default function AccountModal({ isOpen, onClose }: Props) {
             <Flex alignItems="center" mt={2} mb={4} lineHeight={1}>
               <Identicon />
               <Text
-                color="black"
+                color="white"
                 fontSize="xl"
                 fontWeight="semibold"
                 ml="2"
@@ -136,7 +130,7 @@ export default function AccountModal({ isOpen, onClose }: Props) {
 
         <ModalFooter
           justifyContent="flex-start"
-          background="rgb(237, 238, 242)"
+          background="#212429"
           borderBottomLeftRadius="3xl"
           borderBottomRightRadius="3xl"
           p={6}

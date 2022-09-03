@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
-    "@uniswap/v3-periphery": "^1.4.1"
+    "@uniswap/v3-periphery": "^1.4.1",
+    "react-select-search": "^3.0.10"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",
