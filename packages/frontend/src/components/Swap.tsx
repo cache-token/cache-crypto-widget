@@ -10,7 +10,7 @@ import {
 import { SettingsIcon, ChevronDownIcon, ArrowDownIcon } from '@chakra-ui/icons';
 import SwapButton from './SwapButton';
 import TokenSelect from './TokenSelect';
-import TokenModal from './Modal/TokenModal';
+// import TokenModal from './Modal/TokenModal';
 import { useState } from 'react';
 import logo from '../assets/logo.svg';
 import { formatEther } from 'ethers/lib/utils';
@@ -34,7 +34,7 @@ export default function Trade({ handleOpenModal }: Props) {
 }"
       borderRadius="1.37rem"
     >
-      <TokenModal isOpen={isOpen} onClose={onClose} />
+      {/* <TokenModal isOpen={isOpen} onClose={onClose} /> */}
 
       <Flex
         alignItems="center"
