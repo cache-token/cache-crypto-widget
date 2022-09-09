@@ -94,24 +94,24 @@ export default function TokenModal({ isOpen, onClose }: Props) {
                   })
                   .map((val) => {
                     let hidden = false;
-                    if (
-                      window.__button === 'button2' &&
-                      val.name === window.__selected
-                    ) {
-                      hidden = true;
-                    }
+                    // if (
+                    //   window.__button === 'button2' &&
+                    //   val.name === window.__selected
+                    // ) {
+                    //   hidden = true;
+                    // }
                     return (
                       <>
                         <tr
                           id={val.name}
-                          style={{
-                            backgroundColor:
-                              val.name === window.__selected ? '#fbd03b' : '',
-                          }}
+                          // style={{
+                          //   backgroundColor:
+                          //     val.name === window.__selected ? '#fbd03b' : '',
+                          // }}
                           hidden={hidden}
                           onClick={function (e) {
-                            window.__selected = val.name;
-                            window.__imageSelected = val.logoURI;
+                            // window.__selected = val.name;
+                            // window.__imageSelected = val.logoURI;
 
                             setSelected(val.name);
                           }}

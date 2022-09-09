@@ -1,31 +1,24 @@
-import { Button, Box, Image, useDisclosure, Flex } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
-import etherLogo from '../assets/etherLogo.png';
-import './styles.css';
-import SelectSearch, { fuzzySearch } from 'react-select-search';
-import { useEffect, useState } from 'react';
+import AppContext from './appContext';
+import { useContext, useEffect, useState } from 'react';
 import Axios from 'axios';
 import { useEthers } from '@usedapp/core';
 import { gettoken0Contract } from '../services/v3service';
-type Props = {
-  openTokenModal: any;
-  value: any;
-  image: string;
-  button: string;
-};
+import { globalState } from '.';
+import { useAppContext } from './appContext';
 
 export default function TokenSelect() {
   const [tokens, setTokens] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>('Select a token');
   const [search, setSearch] = useState<any>('');
   const { chainId, library } = useEthers();
+  const { setToken } = useAppContext();
   // const signer = library!.getSigner();
   useEffect(() => {
     Axios.get(`https://tokens.uniswap.org/`).then((res) => {
       setTokens(res.data.tokens);
     });
   }, []);
-  function myFunction() {
+  function toggleFunc() {
     const element = document.getElementById(
       'myDropdown'
     ) as HTMLDivElement | null;
@@ -33,7 +26,6 @@ export default function TokenSelect() {
   }
 
   function onOptionSelect(value: any) {
-    console.log(value);
     setSelected(value.symbol);
     const element = document.getElementById(
       'myDropdown'
@@ -41,52 +33,10 @@ export default function TokenSelect() {
     element!.classList.toggle('show');
   }
 
-  // function renderTokens(
-  //   props: any,
-  //   option: any,
-  //   snapshot: any,
-  //   className: any
-  // ) {
-  //   const imgStyle = {
-  //     borderRadius: '50%',
-  //     verticalAlign: 'middle',
-  //     marginRight: 10,
-  //   };
-
-  //   return (
-  //     <button {...props} className={className} type="button">
-  //       <Flex alignItems="center">
-  //         <img
-  //           alt=""
-  //           style={imgStyle}
-  //           width="28"
-  //           height="28"
-  //           src={option.logoURI}
-  //         />
-  //         <span>{option.symbol}</span>
-  //       </Flex>
-  //     </button>
-  //   );
-  // }
   return (
-    // <SelectSearch
-    //   className="select-search no-scroll"
-    //   options={tokens.slice(0, 20)}
-    //   renderOption={renderTokens}
-    //   value={selected}
-    //   onChange={(SelectedOptionValue: any) => {
-    //     window.__selected.name = SelectedOptionValue.toString();
-    //     setSelected(SelectedOptionValue);
-    //     // console.log(SelectedOption);
-    //     console.log(window.__selected);
-    //   }}
-    //   search
-    //   placeholder="Search tokens..."
-    //   filterOptions={fuzzySearch}
-    // />
     <>
       <div className="dropdown">
-        <button onClick={() => myFunction()} className="dropbtn">
+        <button onClick={() => toggleFunc()} className="dropbtn">
           {selected}
         </button>
         <div id="myDropdown" className="dropdown-content">
@@ -105,16 +55,18 @@ export default function TokenSelect() {
             .map((val, index) => {
               return (
                 <div
-                  onClick={() => {
+                  onClick={function (e) {
                     onOptionSelect(val);
+                    setToken(val);
                   }}
                   key={index}
                   className="optionContainer"
                 >
-                  {/* {val.logoURI && (
+                  {val.logoURI && (
                     <img className="imageContainer" src={val.logoURI} alt="" />
-                  )} */}
+                  )}
                   <a>{val.symbol}</a>
+                  (chain ID:{val.chainId})
                 </div>
               );
             })

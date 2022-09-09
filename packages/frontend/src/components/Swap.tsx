@@ -16,6 +16,7 @@ import logo from '../assets/logo.svg';
 import { formatEther } from 'ethers/lib/utils';
 import { useEtherBalance, useEthers } from '@usedapp/core';
 import Identicon from './Identicon';
+
 type Props = {
   handleOpenModal: any;
 };

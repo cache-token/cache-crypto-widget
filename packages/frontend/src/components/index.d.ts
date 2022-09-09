@@ -1,13 +1,11 @@
-export declare global {
-  interface Window {
-    __selected: Token;
-    __imageSelected: string;
-    __button: string;
-  }
-  type Token = {
-    address: string;
-    name: string;
-    symbol: string;
-    decimals: number;
-  };
+export type Token = {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  chainId: number;
+};
+export interface globalState {
+  token: Token;
+  setToken: React.Dispatch<React.SetStateAction<Token>>;
 }

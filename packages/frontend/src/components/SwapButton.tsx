@@ -2,20 +2,19 @@ import { Button, Box } from '@chakra-ui/react';
 import { useEtherBalance, useEthers } from '@usedapp/core';
 import wrapperContractAbi from '../wrapperContract.json';
 import { ethers } from 'ethers';
-type Props = {
-  handleOpenModal: any;
-};
+import { useAppContext } from './appContext';
 
 export default function SwapButton() {
   const { activateBrowserWallet, account } = useEthers();
+  const { token } = useAppContext();
+  console.log(token);
   const etherBalance = useEtherBalance(account);
-
   function handleConnectWallet() {
     activateBrowserWallet();
   }
 
   return account ? (
-    window.__selected ? (
+    token.name ? (
       <Box mt="0.5rem">
         <Button
           color="black"
