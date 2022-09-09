@@ -6,26 +6,88 @@ import {
   Button,
   Input,
   useDisclosure,
+  tokenToCSSVar,
+  Spinner,
 } from '@chakra-ui/react';
 import { SettingsIcon, ChevronDownIcon, ArrowDownIcon } from '@chakra-ui/icons';
 import SwapButton from './SwapButton';
 import TokenSelect from './TokenSelect';
 // import TokenModal from './Modal/TokenModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 import logo from '../assets/logo.svg';
 import { formatEther } from 'ethers/lib/utils';
 import { useEtherBalance, useEthers } from '@usedapp/core';
 import Identicon from './Identicon';
+import { useAppContext } from './appContext';
+import {
+  getCGTBalance,
+  getPrice,
+  gettoken0Contract,
+  getTokenBalance,
+} from '../services/v3service';
 
 type Props = {
   handleOpenModal: any;
 };
 export default function Trade({ handleOpenModal }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [fetchingPrice, setFetchingPrice] = useState(false);
   const [value, setValue] = useState<number>(0);
+  const [valueOut, setValueOut] = useState<any>(0);
+  const [ratio, setRatio] = useState<any>();
+  const { ethereum } = window;
+  const { token, setTokenBalance, setCGTBalance, tokenBalance, CGTBalance } =
+    useAppContext();
   const { account } = useEthers();
   const etherBalance = useEtherBalance(account);
 
+  async function getBalance() {
+    if (account && token.address) {
+      const tokenBalance = await getTokenBalance(token, account);
+      const CGTBalance = await getCGTBalance(account);
+      setTokenBalance(tokenBalance!);
+      setCGTBalance(CGTBalance!);
+    }
+  }
+  async function getContract() {
+    if (ethereum && token.address) {
+      const contract = gettoken0Contract(token.address);
+      console.log(contract);
+      //   try {
+      //     const transaction = await contract.safeMint(account, metadata, {
+      //       gasLimit: 550000,
+      //     });
+      //     await transaction.wait().then(() => {
+      //       notify('success', 'Transaction successful!');
+      //     });
+      //   } catch (error) {
+      //     notify('error', 'Something went wrong, please try again!');
+      //   }
+
+      //   console.log(metadata);
+      // } else {
+      //   notify('error', 'Please connect your wallet!');
+      // }
+    }
+  }
+  async function predictPrice() {
+    if (account && token.address && value) {
+      setFetchingPrice(true);
+      await getPrice(value, account, token).then((data) => {
+        console.log(data);
+        const outputValue = data[1];
+        setValueOut(outputValue);
+        setRatio(data[2]);
+        setFetchingPrice(false);
+      });
+    }
+  }
+  useEffect(() => {
+    getContract();
+    getBalance();
+    predictPrice();
+  }, [token, value]);
   return (
     <Box
       w="30.62rem"
@@ -114,16 +176,37 @@ export default function Trade({ handleOpenModal }: Props) {
               focusBorderColor="none"
               type="number"
               color="white"
+              disabled={fetchingPrice}
               onChange={function (e) {
                 let token2Value = 0;
                 if (e.target.value !== undefined) {
                   // token2Value =
                   //   Number(e.target.value) *
                   //  (window.__price1 / window.__price2);
+                  setValue(parseFloat(e.target.value));
                 }
-                setValue(token2Value);
               }}
             />
+            {tokenBalance && (
+              <Box
+                fontWeight="500"
+                pt="4px"
+                fontSize="=25rem"
+                width="100%"
+                textAlign="right"
+                bg="#212429"
+                outline="none"
+                border="none"
+                color="white"
+              >
+                <Text color="white">
+                  balance:{' '}
+                  <span style={{ color: '#fbd03b' }}>
+                    {parseFloat(tokenBalance).toFixed(4)}
+                  </span>
+                </Text>
+              </Box>
+            )}
           </Box>
         </Flex>
 
@@ -152,7 +235,7 @@ export default function Trade({ handleOpenModal }: Props) {
             p="0.3rem"
             borderRadius="0.75rem"
             pos="relative"
-            top="-3rem"
+            top={tokenBalance || CGTBalance ? '-3.5rem' : '-3rem'}
             left="2.5rem"
           >
             <ArrowDownIcon
@@ -177,14 +260,43 @@ export default function Trade({ handleOpenModal }: Props) {
               focusBorderColor="none"
               type="number"
               color="white"
-              value={value}
+              disabled={true}
+              value={valueOut}
             />
+            {CGTBalance && (
+              <Box
+                fontWeight="500"
+                pt="4px"
+                fontSize="=25rem"
+                width="100%"
+                textAlign="right"
+                bg="#212429"
+                outline="none"
+                border="none"
+                color="white"
+              >
+                <Text color="white">
+                  balance:{' '}
+                  <span style={{ color: '#fbd03b' }}>
+                    {' '}
+                    {parseFloat(CGTBalance).toFixed(4)}
+                  </span>
+                </Text>
+              </Box>
+            )}
           </Box>
         </Flex>
-        <Box color="black">
-          <div>
-            {/* 1 CGT = {window.__price2 / window.__price1} {window.__selected} */}
-          </div>
+        <Box pt="10px" pb="10px" color="white">
+          {fetchingPrice ? (
+            <Flex alignItems="center" gap="5px">
+              <Spinner size="sm" color="#fbd03b" />
+              <Text color="white">fetching price...</Text>
+            </Flex>
+          ) : ratio ? (
+            <div>{`1 DAI = ${ratio.toFixed(15)} ${token.symbol}`}</div>
+          ) : (
+            ''
+          )}
         </Box>
         <SwapButton />
       </Box>

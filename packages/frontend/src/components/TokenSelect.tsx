@@ -2,7 +2,6 @@ import AppContext from './appContext';
 import { useContext, useEffect, useState } from 'react';
 import Axios from 'axios';
 import { useEthers } from '@usedapp/core';
-import { gettoken0Contract } from '../services/v3service';
 import { globalState } from '.';
 import { useAppContext } from './appContext';
 
@@ -50,7 +49,7 @@ export default function TokenSelect() {
           />
           {tokens
             .filter((val) => {
-              return val.name.toLowerCase().includes(search.toLowerCase());
+              return val.symbol.toLowerCase().includes(search.toLowerCase());
             })
             .map((val, index) => {
               return (

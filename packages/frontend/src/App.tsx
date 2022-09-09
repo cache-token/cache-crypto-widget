@@ -20,10 +20,16 @@ function App() {
     decimals: 0,
     chainId: 0,
   });
+  const [tBal, setTBal] = useState('');
+  const [CGTBal, setCGTBal] = useState('');
 
   const values = {
     token: t,
     setToken: setT,
+    tokenBalance: tBal,
+    CGTBalance: CGTBal,
+    setTokenBalance: setTBal,
+    setCGTBalance: setCGTBal,
   };
 
   return (

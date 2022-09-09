@@ -9,6 +9,10 @@ const AppContext = React.createContext<globalState>({
     chainId: 0,
   },
   setToken: () => {},
+  tokenBalance: '',
+  CGTBalance: '',
+  setTokenBalance: () => {},
+  setCGTBalance: () => {},
 });
 export const useAppContext = () => useContext(AppContext);
 export default AppContext;
