@@ -82,9 +82,9 @@ export default function Trade({ handleOpenModal }: Props) {
       setFetchingPrice(true);
       await getPrice(value, account, token).then((data) => {
         console.log(data);
-        const outputValue = data[1];
+        const outputValue = data![1];
         setValueOut(outputValue);
-        setRatio(data[2]);
+        setRatio(data![2]);
         setFetchingPrice(false);
       });
     }
@@ -307,7 +307,7 @@ export default function Trade({ handleOpenModal }: Props) {
               type="number"
               color="white"
               isDisabled={true}
-              value={valueOut.toFixed(4)}
+              value={valueOut}
             />
             {CGTBalance && (
               <Box

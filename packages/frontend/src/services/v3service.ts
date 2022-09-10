@@ -154,7 +154,9 @@ export const getPrice = async (
     signer
   );
 
-  const CGTamt = await WContract.quoteCGTAmountReceived(10000000);
+  // const CGTamt = await WContract.quoteCGTAmountReceived(
+  //   ethers.utils.parseEther(quoteAmountOut.toString())
+  // );
   // return [transaction, ethers.utils.formatUnits(CGTamt, 8), ratio];
   return [transaction, quoteAmountOut, ratio];
 };
