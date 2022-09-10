@@ -25,6 +25,7 @@ import {
   getPrice,
   gettoken0Contract,
   getTokenBalance,
+  swap,
 } from '../services/v3service';
 
 type Props = {
@@ -101,6 +102,9 @@ export default function Trade({ handleOpenModal }: Props) {
   return (
     <Box
       w="25rem"
+      onClick={() => {
+        if (value && token) swap(token!, account!, value!.toString());
+      }}
       mx="auto"
       mt="5.25rem"
       boxShadow="rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
@@ -338,8 +342,6 @@ export default function Trade({ handleOpenModal }: Props) {
               <Spinner size="sm" color="#fbd03b" />
               <Text color="white">fetching price...</Text>
             </Flex>
-          ) : ratio ? (
-            <div>{`1 DAI = ${ratio.toFixed(15)} ${token.symbol}`}</div>
           ) : (
             ''
           )}

@@ -12,9 +12,20 @@ export default function TokenSelect() {
   const { chainId, library } = useEthers();
   const { setToken } = useAppContext();
   // const signer = library!.getSigner();
+  const testWETH = {
+    address: '0xf298e212e92Dc2f0859309B5C5E9fDD3E29a9737',
+    name: 'TestWETH',
+    symbol: 'TWETH',
+    decimals: 18,
+    chainId: 4,
+    logoURI:
+      'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
+  };
   useEffect(() => {
     Axios.get(`https://tokens.uniswap.org/`).then((res) => {
-      setTokens(res.data.tokens);
+      const data = res.data.tokens;
+      data.push(testWETH);
+      setTokens(data);
     });
   }, []);
   function toggleFunc() {

@@ -4,7 +4,7 @@ import {
   ProviderBlockHeaderError,
 } from '@uniswap/smart-order-router';
 import { Token, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core';
-import { ethers, BigNumber } from 'ethers';
+import { ethers, BigNumber, Signer } from 'ethers';
 import JSBI from 'jsbi';
 import { WrapperContract } from '../contractAddress';
 import wrapperContract from './WrapperContract.json';
@@ -79,6 +79,35 @@ export const getCGTBalance = async (account: any) => {
       console.log(error);
     }
   }
+};
+export const swap = async (
+  token: any,
+  walletAddress: string,
+  amount: string
+) => {
+  const signer = provider.getSigner();
+  const XtokenContract = new ethers.Contract(token.address, ERC20ABI, signer);
+  const WContract = new ethers.Contract(
+    WrapperContract,
+    wrapperContract.abi,
+    signer
+  );
+  console.log(XtokenContract);
+  await XtokenContract.connect(signer)
+    .approve(WrapperContract, ethers.utils.parseEther(amount.toString()))
+    .then(async (txRes: any) => {
+      console.log(txRes);
+    });
+
+  WContract.connect(signer).swapTokensForCGT(
+    token.address,
+    3000,
+    ethers.utils
+      .parseEther(amount.toString())
+      .div(10 ** (18 - (await XtokenContract.decimals()))),
+    0,
+    0
+  );
 };
 export const getPrice = async (
   inputAmount: number,
@@ -158,10 +187,9 @@ export const getPrice = async (
     wrapperContract.abi,
     signer
   );
-  console.log(quoteAmountOut);
-  // const CGTamt = await WContract.quoteCGTAmountReceived(
-  //   ethers.utils.parseEther(quoteAmountOut.toString())
-  // );
-  // return [transaction, ethers.utils.formatUnits(CGTamt, 8), ratio];
-  return [transaction, quoteAmountOut, ratio];
+
+  const CGTamt = await WContract.quoteCGTAmountReceived(
+    ethers.utils.parseUnits(quoteAmountOut.toString(), 6)
+  );
+  return [transaction, ethers.utils.formatUnits(CGTamt, 8), ratio];
 };
