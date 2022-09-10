@@ -153,7 +153,7 @@ export const getPrice = async (
     wrapperContract.abi,
     signer
   );
-
+  console.log(quoteAmountOut);
   // const CGTamt = await WContract.quoteCGTAmountReceived(
   //   ethers.utils.parseEther(quoteAmountOut.toString())
   // );
