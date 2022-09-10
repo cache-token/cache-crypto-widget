@@ -22,11 +22,11 @@ const router = new AlphaRouter({ chainId: chainId, provider: provider });
 // const address1 = '0xeb8f08a975Ab53E34D8a0330E0D34de942C95926'; //contract address of  USDC
 // const USDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
-const name1 = 'Dai Stablecoin';
-const symbol1 = 'DAI';
-const decimals1 = 18;
-const address1 = '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735'; //contract address of  USDC
-const DAI = new Token(chainId, address1, decimals1, symbol1, name1);
+const name1 = 'TestUSDC';
+const symbol1 = 'TUSDC';
+const decimals1 = 6;
+const address1 = '0x4A697C0852f1B59fc6E58C55d3D84899A1a6F151'; //contract address of  USDC
+const TUSDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
 export const gettoken0Contract = (address: any) =>
   new ethers.Contract(address, ERC20ABI, provider);
@@ -97,14 +97,14 @@ export const getPrice = async (
   const currencyAmount = CurrencyAmount.fromRawAmount(XTOKEN, JSBI.BigInt(wei));
   //create DAI/XTOKEN pool
   const pool = new Pool(
-    DAI,
+    TUSDC,
     XTOKEN,
     3000,
     '1283723400872544054280619964098219',
     '8390320113764730804',
     193868
   );
-  const token0Balance = CurrencyAmount.fromRawAmount(DAI, '5000000000');
+  const token0Balance = CurrencyAmount.fromRawAmount(TUSDC, '5000000000');
   const routeToRatioResponse = await router.routeToRatio(
     token0Balance,
     currencyAmount,
@@ -129,11 +129,16 @@ export const getPrice = async (
       },
     }
   );
-  const route = await router.route(currencyAmount, DAI, TradeType.EXACT_INPUT, {
-    recipient: walletAddress,
-    slippageTolerance: percentSlippage,
-    deadline: 15,
-  });
+  const route = await router.route(
+    currencyAmount,
+    TUSDC,
+    TradeType.EXACT_INPUT,
+    {
+      recipient: walletAddress,
+      slippageTolerance: percentSlippage,
+      deadline: 15,
+    }
+  );
 
   const transaction = {
     data: route!.methodParameters!.calldata,
