@@ -33,8 +33,9 @@ type Props = {
 export default function Trade({ handleOpenModal }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [fetchingPrice, setFetchingPrice] = useState(false);
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>();
   const [valueOut, setValueOut] = useState<any>(0);
+  const [CGTcontractBalance, setCGTcontractBalance] = useState('');
   const [ratio, setRatio] = useState<any>();
   const { ethereum } = window;
   const { token, setTokenBalance, setCGTBalance, tokenBalance, CGTBalance } =
@@ -45,9 +46,14 @@ export default function Trade({ handleOpenModal }: Props) {
   async function getBalance() {
     if (account && token.address) {
       const tokenBalance = await getTokenBalance(token, account);
-      const CGTBalance = await getCGTBalance(account);
       setTokenBalance(tokenBalance!);
-      setCGTBalance(CGTBalance!);
+    }
+  }
+  async function getCGTBalanceFunc() {
+    if (account) {
+      const CGTBalanceData = await getCGTBalance(account);
+      setCGTBalance(CGTBalanceData![0]);
+      setCGTcontractBalance(CGTBalanceData![1]);
     }
   }
   async function getContract() {
@@ -83,14 +89,18 @@ export default function Trade({ handleOpenModal }: Props) {
       });
     }
   }
+
+  if (CGTcontractBalance == '' && CGTBalance == '') {
+    getCGTBalanceFunc();
+  }
   useEffect(() => {
     getContract();
-    getBalance();
     predictPrice();
+    getBalance();
   }, [token, value]);
   return (
     <Box
-      w="30.62rem"
+      w="25rem"
       mx="auto"
       mt="5.25rem"
       boxShadow="rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
@@ -117,37 +127,58 @@ export default function Trade({ handleOpenModal }: Props) {
         />
       </Flex>
       {account && (
-        <Flex alignItems="center" justifyContent="center" bg="#191b1d" py="0">
-          <Box px="5">
-            <Text color="white" fontSize="md">
-              {etherBalance && parseFloat(formatEther(etherBalance)).toFixed(0)}{' '}
-              ETH
-            </Text>
-          </Box>
-          <Button
-            onClick={handleOpenModal}
+        <>
+          <Flex alignItems="center" justifyContent="center" bg="#191b1d" py="0">
+            <Box px="5">
+              <Text color="white" fontSize="md">
+                {etherBalance &&
+                  parseFloat(formatEther(etherBalance)).toFixed(0)}{' '}
+                ETH
+              </Text>
+            </Box>
+            <Button
+              onClick={handleOpenModal}
+              bg="#191b1d"
+              border="0.06rem solid rgb(247, 248, 250)"
+              _hover={{
+                border: '0.06rem',
+                borderStyle: 'solid',
+                borderColor: 'rgb(211,211,211)',
+              }}
+              borderRadius="xl"
+              m="0.06rem"
+              px={3}
+              h="2.37rem"
+            >
+              <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+                {account &&
+                  `${account.slice(0, 6)}...${account.slice(
+                    account.length - 4,
+                    account.length
+                  )}`}
+              </Text>
+              <Identicon />
+            </Button>
+          </Flex>
+          <Flex
+            alignItems="center"
+            justifyContent="center"
             bg="#191b1d"
-            border="0.06rem solid rgb(247, 248, 250)"
-            _hover={{
-              border: '0.06rem',
-              borderStyle: 'solid',
-              borderColor: 'rgb(211,211,211)',
-            }}
-            borderRadius="xl"
-            m="0.06rem"
-            px={3}
-            h="2.37rem"
+            py="10px"
+            pt="15px"
           >
-            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
-              {account &&
-                `${account.slice(0, 6)}...${account.slice(
-                  account.length - 4,
-                  account.length
-                )}`}
-            </Text>
-            <Identicon />
-          </Button>
-        </Flex>
+            <Box>
+              {CGTcontractBalance && (
+                <Flex alignItems="center" gap="5px">
+                  <Text color="white">
+                    {parseFloat(CGTcontractBalance).toFixed(4)}
+                  </Text>
+                  <Image height={25} width={25} src={logo} />
+                </Flex>
+              )}
+            </Box>
+          </Flex>
+        </>
       )}
 
       <Box p="1rem" bg="#191b1d" borderRadius="0 0 1.37rem 1.37rem">
@@ -164,6 +195,7 @@ export default function Trade({ handleOpenModal }: Props) {
           </Box>
           <Box>
             <Input
+              // defaultValue={value}
               placeholder="0.0"
               fontWeight="500"
               fontSize="1.5rem"
@@ -178,11 +210,7 @@ export default function Trade({ handleOpenModal }: Props) {
               color="white"
               disabled={fetchingPrice}
               onChange={function (e) {
-                let token2Value = 0;
                 if (e.target.value !== undefined) {
-                  // token2Value =
-                  //   Number(e.target.value) *
-                  //  (window.__price1 / window.__price2);
                   setValue(parseFloat(e.target.value));
                 }
               }}
@@ -199,12 +227,30 @@ export default function Trade({ handleOpenModal }: Props) {
                 border="none"
                 color="white"
               >
-                <Text color="white">
+                <Flex
+                  alignItems="center"
+                  justifyContent="end"
+                  color="white"
+                  gap="5px"
+                  fontSize="sm"
+                >
                   balance:{' '}
                   <span style={{ color: '#fbd03b' }}>
                     {parseFloat(tokenBalance).toFixed(4)}
                   </span>
-                </Text>
+                  <Button
+                    _hover={{
+                      bg: '#212429',
+                      borderColor: '#fbd03b',
+                      color: '#fbd03b',
+                    }}
+                    size="xs"
+                    variant="outline"
+                    onClick={() => setValue(parseFloat(tokenBalance))}
+                  >
+                    max
+                  </Button>
+                </Flex>
               </Box>
             )}
           </Box>
@@ -250,7 +296,7 @@ export default function Trade({ handleOpenModal }: Props) {
           <Box>
             <Input
               placeholder="0.0"
-              fontSize="1.5rem"
+              fontSize={valueOut.toString().length >= 18 ? '1rem' : '1.5rem'}
               width="100%"
               size="19rem"
               textAlign="right"
@@ -260,14 +306,14 @@ export default function Trade({ handleOpenModal }: Props) {
               focusBorderColor="none"
               type="number"
               color="white"
-              disabled={true}
-              value={valueOut}
+              isDisabled={true}
+              value={valueOut.toFixed(4)}
             />
             {CGTBalance && (
               <Box
                 fontWeight="500"
                 pt="4px"
-                fontSize="=25rem"
+                fontSize="=sm"
                 width="100%"
                 textAlign="right"
                 bg="#212429"
@@ -275,7 +321,7 @@ export default function Trade({ handleOpenModal }: Props) {
                 border="none"
                 color="white"
               >
-                <Text color="white">
+                <Text fontSize="sm" color="white">
                   balance:{' '}
                   <span style={{ color: '#fbd03b' }}>
                     {' '}

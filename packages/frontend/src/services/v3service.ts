@@ -6,6 +6,9 @@ import {
 import { Token, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core';
 import { ethers, BigNumber } from 'ethers';
 import JSBI from 'jsbi';
+import { WrapperContract } from '../contractAddress';
+import wrapperContract from './WrapperContract.json';
+import { Pool, Position } from '@uniswap/v3-sdk';
 
 const V3_SWAP_ROUTER_ADDRESS = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 const chainId = 4; //rinkeby network
@@ -66,9 +69,12 @@ export const getCGTBalance = async (account: any) => {
         ERC20ABI,
         signer
       );
-
+      const CGTbalContract = await CGTContract.balanceOf(WrapperContract);
       const cgtbalance = await CGTContract.balanceOf(account);
-      return ethers.utils.formatUnits(cgtbalance, '8');
+      return [
+        ethers.utils.formatUnits(cgtbalance, 8),
+        ethers.utils.formatUnits(CGTbalContract, 8),
+      ];
     } catch (error) {
       console.log(error);
     }
@@ -89,7 +95,40 @@ export const getPrice = async (
   const percentSlippage = new Percent(25, 100);
   const wei = ethers.utils.parseUnits(inputAmount.toString(), token.decimals);
   const currencyAmount = CurrencyAmount.fromRawAmount(XTOKEN, JSBI.BigInt(wei));
-
+  //create DAI/XTOKEN pool
+  const pool = new Pool(
+    DAI,
+    XTOKEN,
+    3000,
+    '1283723400872544054280619964098219',
+    '8390320113764730804',
+    193868
+  );
+  const token0Balance = CurrencyAmount.fromRawAmount(DAI, '5000000000');
+  const routeToRatioResponse = await router.routeToRatio(
+    token0Balance,
+    currencyAmount,
+    new Position({
+      pool,
+      tickLower: -60,
+      tickUpper: 60,
+      liquidity: 1,
+    }),
+    {
+      ratioErrorTolerance: new Percent(1, 100),
+      maxIterations: 6,
+    },
+    {
+      swapOptions: {
+        recipient: walletAddress,
+        slippageTolerance: new Percent(5, 100),
+        deadline: 100,
+      },
+      addLiquidityOptions: {
+        tokenId: 10,
+      },
+    }
+  );
   const route = await router.route(currencyAmount, DAI, TradeType.EXACT_INPUT, {
     recipient: walletAddress,
     slippageTolerance: percentSlippage,
@@ -107,5 +146,15 @@ export const getPrice = async (
 
   const quoteAmountOut = parseFloat(route!.quote.toFixed(6));
   const ratio = inputAmount / quoteAmountOut;
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const WContract = new ethers.Contract(
+    WrapperContract,
+    wrapperContract.abi,
+    signer
+  );
+
+  const CGTamt = await WContract.quoteCGTAmountReceived(10000000);
+  // return [transaction, ethers.utils.formatUnits(CGTamt, 8), ratio];
   return [transaction, quoteAmountOut, ratio];
 };

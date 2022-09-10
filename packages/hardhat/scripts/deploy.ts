@@ -6,7 +6,7 @@ import { WrapperContract } from "../typechain-types";
 import { ContractAddresses, SwapRouterAddress } from "../Addresses";
 
 const margin = 50;
-const deployNetwork = "mainnet";
+const deployNetwork = "rinkeby";
 
 async function main() {
   const _Wrapper = await ethers.getContractFactory("WrapperContract");
