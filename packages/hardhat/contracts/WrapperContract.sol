@@ -115,7 +115,7 @@ contract WrapperContract is Ownable, Pausable {
         uint256 amountOut = swapRouter.exactInputSingle(params);
         totalFeesCollected += (amountOut * margin) / 10000;
         uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
-        uint256 CGTAmount = ((netStableTokenAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
+        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
@@ -138,7 +138,7 @@ contract WrapperContract is Ownable, Pausable {
      */
     function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
         uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
-        uint256 CGTAmount = ((netStableTokenAmount * 100) * 10 ** 8) / uint256(getLatestXAU_USDPrice());
+        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
         return CGTAmount;
     }
 

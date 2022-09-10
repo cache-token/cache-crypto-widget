@@ -148,7 +148,7 @@ describe("Wrapper contract test", function() {
 
   it('6. contract correctly quotes CGT amount out', async function () {
     const amount = 10;
-    const price = (await wrapper.getLatestXAU_USDPrice()).toNumber() / 10 ** 8;
+    const price = (await wrapper.getLatestXAU_USDPrice()).toNumber() / (28.34952 * 10 ** 8);
     const quote = await wrapper.quoteCGTAmountReceived(amount * (10 ** await stable.decimals()));
     expect(
       parseFloat((quote.toNumber() / (10 ** await cacheGold.decimals())).toFixed(await cacheGold.decimals()))
