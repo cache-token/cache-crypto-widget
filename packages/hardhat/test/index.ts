@@ -232,5 +232,11 @@ describe("Wrapper contract test", function() {
       0
     )).to.emit(wrapper, 'SwappedTokensForCGT');
   });
+
+  it('10. stabletoken address can be set by owner', async function () {
+    const USDT_Address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+    await wrapper.setStable(USDT_Address);
+    expect(await wrapper.stable()).to.equal(USDT_Address);
+  });
 });
 
