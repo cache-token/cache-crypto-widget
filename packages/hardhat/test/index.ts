@@ -11,7 +11,6 @@ const testNetwork = "mainnet";
 const XAU_USD_PriceFeed = ContractAddresses[testNetwork].XAU_USD_PriceFeed;
 const CGT_Address = ContractAddresses[testNetwork].CGT_Address;
 const USDC_Address = ContractAddresses[testNetwork].USDC_Address;
-const TUSDC_Address = "0x4A697C0852f1B59fc6E58C55d3D84899A1a6F151";
 
 const margin = 50;
 
@@ -300,12 +299,7 @@ describe("Wrapper contract test", function () {
         )
     ).to.emit(wrapper, "SwappedTokensForCGT");
   });
-  it("10. set stable Token", async function () {
-    await wrapper.setStable(TUSDC_Address);
-    expect(await wrapper.stable()).to.equal(TUSDC_Address);
-  });
-
-  it('10. stabletoken address can be set by owner', async function () {
+  it("10. stabletoken address can be set by owner", async function () {
     const USDT_Address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     await wrapper.setStable(USDT_Address);
     expect(await wrapper.stable()).to.equal(USDT_Address);
