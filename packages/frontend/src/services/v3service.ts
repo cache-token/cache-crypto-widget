@@ -19,7 +19,7 @@ const router = new AlphaRouter({ chainId: chainId, provider: provider });
 // const name1 = 'USD Coin';
 // const symbol1 = 'USDC';
 // const decimals1 = 6;
-// const address1 = '0xeb8f08a975Ab53E34D8a0330E0D34de942C95926'; //contract address of  USDC
+// const address1 = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; //contract address of  USDC
 // const USDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
 const name1 = 'TestUSDC';
@@ -87,11 +87,13 @@ export const swap = async (
 ) => {
   const signer = provider.getSigner();
   const XtokenContract = new ethers.Contract(token.address, ERC20ABI, signer);
+
   const WContract = new ethers.Contract(
     WrapperContract,
     wrapperContract.abi,
     signer
   );
+  console.log(await WContract.stable());
   console.log(XtokenContract);
   await XtokenContract.connect(signer)
     .approve(WrapperContract, ethers.utils.parseEther(amount.toString()))
@@ -124,40 +126,7 @@ export const getPrice = async (
   const percentSlippage = new Percent(25, 100);
   const wei = ethers.utils.parseUnits(inputAmount.toString(), token.decimals);
   const currencyAmount = CurrencyAmount.fromRawAmount(XTOKEN, JSBI.BigInt(wei));
-  //create DAI/XTOKEN pool
-  const pool = new Pool(
-    TUSDC,
-    XTOKEN,
-    3000,
-    '1283723400872544054280619964098219',
-    '8390320113764730804',
-    193868
-  );
-  const token0Balance = CurrencyAmount.fromRawAmount(TUSDC, '5000000000');
-  const routeToRatioResponse = await router.routeToRatio(
-    token0Balance,
-    currencyAmount,
-    new Position({
-      pool,
-      tickLower: -60,
-      tickUpper: 60,
-      liquidity: 1,
-    }),
-    {
-      ratioErrorTolerance: new Percent(1, 100),
-      maxIterations: 6,
-    },
-    {
-      swapOptions: {
-        recipient: walletAddress,
-        slippageTolerance: new Percent(5, 100),
-        deadline: 100,
-      },
-      addLiquidityOptions: {
-        tokenId: 10,
-      },
-    }
-  );
+
   const route = await router.route(
     currencyAmount,
     TUSDC,
