@@ -15,6 +15,9 @@ import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 /// @notice Contract to swap ERC20 tokens for CGT based on Chainlink XAU price feed
 /// @dev Contract uses UniswapV3 SwapRouter and Chainlink data feed
 contract WrapperContract is Ownable, Pausable {
+    uint32 constant GRAM_PER_TROY_OUNCE = 311034768;
+    uint64 constant CONVERSION_FACTOR = 10**10;
+
     AggregatorV3Interface internal priceFeed;
 
     // margin in basis points
@@ -115,7 +118,10 @@ contract WrapperContract is Ownable, Pausable {
         uint256 amountOut = swapRouter.exactInputSingle(params);
         totalFeesCollected += (amountOut * margin) / 10000;
         uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        // Multiplication by a factor of 10000000 in order to peform division by 311034768
+        uint256 pricePerGram = (uint256(getLatestXAU_USDPrice()) * 10**7) / GRAM_PER_TROY_OUNCE;
+        // Decimal conversion of amount in stabletokens to equivalent CGT amount as per the price
+        uint256 CGTAmount = (netStableTokenAmount * CONVERSION_FACTOR) / pricePerGram;
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
@@ -138,14 +144,15 @@ contract WrapperContract is Ownable, Pausable {
      */
     function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
         uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        uint256 pricePerGram = (uint256(getLatestXAU_USDPrice()) * 10**7) / GRAM_PER_TROY_OUNCE;
+        uint256 CGTAmount = (netStableTokenAmount * CONVERSION_FACTOR) / pricePerGram;
         return CGTAmount;
     }
 
     /**
      * @notice Returns the latest XAU-USD price
      * @dev Calls XAU-USD data feed
-     * @return XAU-USD price
+     * @return XAU-USD price per troy oz
      */
     function getLatestXAU_USDPrice() public view returns (int256) {
         (
