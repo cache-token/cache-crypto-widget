@@ -7,7 +7,6 @@ import Swap from './components/Swap';
 import '@fontsource/inter';
 import './global.css';
 import { Token } from './components';
-import Test from './components/Api/Test';
 import { useState } from 'react';
 import AppContext from './components/appContext';
 

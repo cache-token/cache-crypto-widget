@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "CGT Widget",
+  "name": "A widget for buying CGT using any token at chainlink XAU price + margin",
   "icons": [
     {
       "src": "favicon.ico",

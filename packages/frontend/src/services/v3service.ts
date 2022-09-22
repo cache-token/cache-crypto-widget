@@ -1,16 +1,15 @@
 import ERC20ABI from './ERC20ABI.json';
-import {
-  AlphaRouter,
-  ProviderBlockHeaderError,
-} from '@uniswap/smart-order-router';
+import { AlphaRouter } from '@uniswap/smart-order-router';
 import { Token, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core';
-import { ethers, BigNumber, Signer } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import JSBI from 'jsbi';
 import { WrapperContract } from '../contractAddress';
 import wrapperContract from './WrapperContract.json';
-import { Pool, Position } from '@uniswap/v3-sdk';
+import { getAppConfig } from '../helpers';
+import { IAppConfig } from '../models';
 
-const V3_SWAP_ROUTER_ADDRESS = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
+const config: IAppConfig = getAppConfig();
+const V3_SWAP_ROUTER_ADDRESS = config.CONTRACTS_ADDRESS.V3_SWAP_ROUTER_ADDRESS;
 const chainId = 4; //rinkeby network
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -25,7 +24,7 @@ const router = new AlphaRouter({ chainId: chainId, provider: provider });
 const name1 = 'TestUSDC';
 const symbol1 = 'TUSDC';
 const decimals1 = 6;
-const address1 = '0x4A697C0852f1B59fc6E58C55d3D84899A1a6F151'; //contract address of  USDC
+const address1 = config.CONTRACTS_ADDRESS.USDC; //contract address of  USDC
 const TUSDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
 export const gettoken0Contract = (address: any) =>
@@ -65,7 +64,7 @@ export const getCGTBalance = async (account: any) => {
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       const CGTContract = new ethers.Contract(
-        '0x5d20692Be3324110E4D258D4ec0d129Dc39040E5',
+        config.CONTRACTS_ADDRESS.CGT,
         ERC20ABI,
         signer
       );

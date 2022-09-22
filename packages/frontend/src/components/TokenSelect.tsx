@@ -76,7 +76,7 @@ export default function TokenSelect() {
                     <img className="imageContainer" src={val.logoURI} alt="" />
                   )}
                   <a>{val.symbol}</a>
-                  (chain ID:{val.chainId})
+                  {/* (chain ID:{val.chainId}) */}
                 </div>
               );
             })

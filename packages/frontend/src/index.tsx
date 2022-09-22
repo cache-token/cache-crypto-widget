@@ -6,10 +6,13 @@ import { ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { HttpLink } from 'apollo-link-http';
+import { getAppConfig } from './helpers';
+import { IAppConfig } from './models';
 
+const config: IAppConfig = getAppConfig();
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
+    uri: config.UNISWAP_SUBGRAPH,
   }),
   cache: new InMemoryCache(),
 });
