@@ -3,7 +3,10 @@ import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { WrapperContract } from "../typechain-types";
-import { ContractAddresses, SwapRouterAddress } from "../Addresses";
+import config from "../config/config.dev.json";
+
+const ContractAddresses = config.ContractAddresses;
+const SwapRouterAddress = config.SwapRouterAddress;
 
 const margin = 50;
 const deployNetwork = "rinkeby";

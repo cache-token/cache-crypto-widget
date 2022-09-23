@@ -5,7 +5,11 @@ import { ethers, network } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import { WrapperContract, ERC20 } from "../typechain-types";
-import { ContractAddresses, SwapRouterAddress } from "../Addresses";
+//import { ContractAddresses, SwapRouterAddress } from "../Addresses";
+import config from "../config/config.dev.json";
+
+const ContractAddresses = config.ContractAddresses;
+const SwapRouterAddress = config.SwapRouterAddress;
 
 const testNetwork = "mainnet";
 const XAU_USD_PriceFeed = ContractAddresses[testNetwork].XAU_USD_PriceFeed;

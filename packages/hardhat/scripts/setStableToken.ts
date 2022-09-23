@@ -1,6 +1,9 @@
 import { ethers } from "hardhat";
 import { WrapperContract } from "../typechain-types";
-import { WrapperContract as WrapperContractAddress } from "../contractAddress";
+import config from "../config/config.dev.json";
+
+const ContractAddresses = config.ContractAddresses;
+const SwapRouterAddress = config.SwapRouterAddress;
 
 const newStableTokenAddress = "";
 
