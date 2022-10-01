@@ -60,7 +60,10 @@ export default function TokenSelect() {
           />
           {tokens
             .filter((val) => {
-              return val.symbol.toLowerCase().includes(search.toLowerCase());
+              return (
+                val.symbol.toLowerCase().includes(search.toLowerCase()) &&
+                val.chainId === 4
+              );
             })
             .map((val, index) => {
               return (
