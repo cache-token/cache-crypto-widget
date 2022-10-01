@@ -2,9 +2,10 @@
 pragma solidity 0.8.7;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
@@ -14,10 +15,7 @@ import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 /// @title CACHE-Widget Wrapper Contract
 /// @notice Contract to swap ERC20 tokens for CGT based on Chainlink XAU price feed
 /// @dev Contract uses UniswapV3 SwapRouter and Chainlink data feed
-contract WrapperContract is Ownable, Pausable {
-    uint32 constant GRAM_PER_TROY_OUNCE = 311034768;
-    uint64 constant CONVERSION_FACTOR = 10**10;
-
+contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
     AggregatorV3Interface internal priceFeed;
 
     // margin in basis points
@@ -97,10 +95,23 @@ contract WrapperContract is Ownable, Pausable {
     ) 
         external 
         whenNotPaused
+        nonReentrant
     {
         require(tokenIn != address(0), "Invalid token address");
         require(amountIn > 0, "Invalid amount");
 
+        _swapTokensForCGT(tokenIn, poolFee, amountIn, stableAmountOutMinimum, sqrtPriceLimitX96);
+    }
+
+    function _swapTokensForCGT(
+        address tokenIn,
+        uint24 poolFee,
+        uint256 amountIn,
+        uint256 stableAmountOutMinimum,
+        uint160 sqrtPriceLimitX96
+    ) 
+        private
+    {
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
@@ -118,10 +129,7 @@ contract WrapperContract is Ownable, Pausable {
         uint256 amountOut = swapRouter.exactInputSingle(params);
         totalFeesCollected += (amountOut * margin) / 10000;
         uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
-        // Multiplication by a factor of 10000000 in order to peform division by 311034768
-        uint256 pricePerGram = (uint256(getLatestXAU_USDPrice()) * 10**7) / GRAM_PER_TROY_OUNCE;
-        // Decimal conversion of amount in stabletokens to equivalent CGT amount as per the price
-        uint256 CGTAmount = (netStableTokenAmount * CONVERSION_FACTOR) / pricePerGram;
+        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
@@ -130,8 +138,9 @@ contract WrapperContract is Ownable, Pausable {
     /// @notice Transfers tokens from the contract to the owner
     function withdrawTokens(IERC20 token) external onlyOwner {
         require(address(token) != address(0), "Invalid token address");
-        token.transfer(
-            owner(), 
+        TransferHelper.safeTransfer(
+            address(token), 
+            owner(),
             token.balanceOf(address(this))
         );
     }
@@ -144,15 +153,14 @@ contract WrapperContract is Ownable, Pausable {
      */
     function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
         uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
-        uint256 pricePerGram = (uint256(getLatestXAU_USDPrice()) * 10**7) / GRAM_PER_TROY_OUNCE;
-        uint256 CGTAmount = (netStableTokenAmount * CONVERSION_FACTOR) / pricePerGram;
+        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
         return CGTAmount;
     }
 
     /**
      * @notice Returns the latest XAU-USD price
      * @dev Calls XAU-USD data feed
-     * @return XAU-USD price per troy oz
+     * @return XAU-USD price
      */
     function getLatestXAU_USDPrice() public view returns (int256) {
         (

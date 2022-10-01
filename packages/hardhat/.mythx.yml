@@ -1,0 +1,15 @@
+output: packages/hardhat/mythx.json
+format: json
+viaIR: true
+analyze:
+    mode: full
+    create-group: true
+    group-name: cache-widget
+    solc: 0.8.7
+    async: true
+    remappings:
+        - "@openzeppelin=./node_modules/@openzeppelin"
+        - "@chainlink=./node_modules/@chainlink"
+        - "@uniswap=./node_modules/@uniswap"
+    targets:
+        - packages/hardhat/contracts/WrapperContract.sol
