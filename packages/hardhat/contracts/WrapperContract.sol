@@ -5,6 +5,7 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
@@ -14,7 +15,7 @@ import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 /// @title CACHE-Widget Wrapper Contract
 /// @notice Contract to swap ERC20 tokens for CGT based on Chainlink XAU price feed
 /// @dev Contract uses UniswapV3 SwapRouter and Chainlink data feed
-contract WrapperContract is Ownable, Pausable {
+contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
     AggregatorV3Interface internal priceFeed;
 
     // margin in basis points
@@ -94,10 +95,23 @@ contract WrapperContract is Ownable, Pausable {
     ) 
         external 
         whenNotPaused
+        nonReentrant
     {
         require(tokenIn != address(0), "Invalid token address");
         require(amountIn > 0, "Invalid amount");
 
+        _swapTokensForCGT(tokenIn, poolFee, amountIn, stableAmountOutMinimum, sqrtPriceLimitX96);
+    }
+
+    function _swapTokensForCGT(
+        address tokenIn,
+        uint24 poolFee,
+        uint256 amountIn,
+        uint256 stableAmountOutMinimum,
+        uint160 sqrtPriceLimitX96
+    ) 
+        private
+    {
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
@@ -124,8 +138,9 @@ contract WrapperContract is Ownable, Pausable {
     /// @notice Transfers tokens from the contract to the owner
     function withdrawTokens(IERC20 token) external onlyOwner {
         require(address(token) != address(0), "Invalid token address");
-        token.transfer(
-            owner(), 
+        TransferHelper.safeTransfer(
+            address(token), 
+            owner(),
             token.balanceOf(address(this))
         );
     }
