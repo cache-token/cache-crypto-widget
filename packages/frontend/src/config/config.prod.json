@@ -4,5 +4,6 @@
     "V3_SWAP_ROUTER_ADDRESS": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
     "USDC": "0x4A697C0852f1B59fc6E58C55d3D84899A1a6F151"
   },
-  "UNISWAP_SUBGRAPH": "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
+  "UNISWAP_SUBGRAPH": "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
+  "CHAIN_ID": 1
 }

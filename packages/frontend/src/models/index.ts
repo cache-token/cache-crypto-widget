@@ -5,4 +5,5 @@ export interface IAppConfig {
     USDC: string;
   };
   UNISWAP_SUBGRAPH: string;
+  CHAIN_ID: number;
 }
