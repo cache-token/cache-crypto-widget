@@ -10,7 +10,7 @@ import { IAppConfig } from '../models';
 
 const config: IAppConfig = getAppConfig();
 const V3_SWAP_ROUTER_ADDRESS = config.CONTRACTS_ADDRESS.V3_SWAP_ROUTER_ADDRESS;
-const chainId = 4; //rinkeby network
+const chainId = config.CHAIN_ID; //polygon network
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const router = new AlphaRouter({ chainId: chainId, provider: provider });
@@ -21,12 +21,13 @@ const router = new AlphaRouter({ chainId: chainId, provider: provider });
 // const address1 = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; //contract address of  USDC
 // const USDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
-const name1 = 'TestUSDC';
-const symbol1 = 'TUSDC';
+const name1 = 'USD Coin';
+const symbol1 = 'USDC';
 const decimals1 = 6;
 const address1 = config.CONTRACTS_ADDRESS.USDC; //contract address of  USDC
 const TUSDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
+export const getNetwork = async () => await provider.getNetwork();
 export const gettoken0Contract = (address: any) =>
   new ethers.Contract(address, ERC20ABI, provider);
 
@@ -143,7 +144,7 @@ export const getPrice = async (
     value: BigNumber.from(route!.methodParameters!.value),
     from: walletAddress,
     gasPrice: BigNumber.from(route!.gasPriceWei),
-    gasLimit: ethers.utils.hexlify(1000000),
+    //gasLimit: ethers.utils.hexlify(1000000),
   };
 
   const quoteAmountOut = parseFloat(route!.quote.toFixed(6));

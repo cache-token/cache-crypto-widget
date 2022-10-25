@@ -4,17 +4,18 @@ import Axios from 'axios';
 import { useEthers } from '@usedapp/core';
 import { globalState } from '.';
 import { useAppContext } from './appContext';
+import { getTokenBalance } from '../services/v3service';
 
 export default function TokenSelect() {
   const [tokens, setTokens] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>('Select a token');
   const [search, setSearch] = useState<any>('');
-  const { chainId, library } = useEthers();
+  const { chainId, account } = useEthers();
   const { setToken } = useAppContext();
   // const signer = library!.getSigner();
   const testWETH = {
-    address: '0xf298e212e92Dc2f0859309B5C5E9fDD3E29a9737',
     name: 'TestWETH',
+    address: '0xf298e212e92Dc2f0859309B5C5E9fDD3E29a9737',
     symbol: 'TWETH',
     decimals: 18,
     chainId: 4,
@@ -23,8 +24,11 @@ export default function TokenSelect() {
   };
   useEffect(() => {
     Axios.get(`https://tokens.uniswap.org/`).then((res) => {
-      const data = res.data.tokens;
+      const data = res.data.tokens.filter((val: any) => {
+        return val.chainId === 137;
+      });
       data.push(testWETH);
+      console.log(data);
       setTokens(data);
     });
   }, []);
@@ -35,8 +39,9 @@ export default function TokenSelect() {
     element!.classList.toggle('show');
   }
 
-  function onOptionSelect(value: any) {
+  async function onOptionSelect(value: any) {
     setSelected(value.symbol);
+
     const element = document.getElementById(
       'myDropdown'
     ) as HTMLDivElement | null;
@@ -62,15 +67,18 @@ export default function TokenSelect() {
             .filter((val) => {
               return (
                 val.symbol.toLowerCase().includes(search.toLowerCase()) &&
-                val.chainId === 4
+                val.chainId === 137
               );
             })
             .map((val, index) => {
               return (
                 <div
-                  onClick={function (e) {
+                  onClick={async function (e) {
                     onOptionSelect(val);
                     setToken(val);
+                    await getTokenBalance(val, account).then((value) => {
+                      console.log(value);
+                    });
                   }}
                   key={index}
                   className="optionContainer"
