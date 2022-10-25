@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "npm start -w @cache-crypto-widget/frontend",
+    "test-fe": "npm run test:watch -w @cache-crypto-widget/frontend",
     "build": "npm run build -w @cache-crypto-widget/frontend",
     "accounts": "npm run accounts -w @cache-crypto-widget/hardhat",
     "chain": "npm run chain -w @cache-crypto-widget/hardhat",

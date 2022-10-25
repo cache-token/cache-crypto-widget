@@ -27,6 +27,7 @@ const decimals1 = 6;
 const address1 = config.CONTRACTS_ADDRESS.USDC; //contract address of  USDC
 const TUSDC = new Token(chainId, address1, decimals1, symbol1, name1);
 
+export const getNetwork = async () => await provider.getNetwork();
 export const gettoken0Contract = (address: any) =>
   new ethers.Contract(address, ERC20ABI, provider);
 

@@ -6,7 +6,6 @@ import {
   Button,
   Input,
   useDisclosure,
-  tokenToCSSVar,
   Spinner,
 } from '@chakra-ui/react';
 import { SettingsIcon, ChevronDownIcon, ArrowDownIcon } from '@chakra-ui/icons';
@@ -14,10 +13,8 @@ import SwapButton from './SwapButton';
 import TokenSelect from './TokenSelect';
 // import TokenModal from './Modal/TokenModal';
 import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
 import logo from '../assets/logo.svg';
-import { formatEther } from 'ethers/lib/utils';
-import { useEtherBalance, useEthers } from '@usedapp/core';
+import { useEthers } from '@usedapp/core';
 import Identicon from './Identicon';
 import { useAppContext } from './appContext';
 import {
@@ -26,7 +23,9 @@ import {
   gettoken0Contract,
   getTokenBalance,
   swap,
+  getNetwork,
 } from '../services/v3service';
+import { ethers } from 'ethers';
 
 type Props = {
   handleOpenModal: any;
@@ -36,14 +35,21 @@ export default function Trade({ handleOpenModal }: Props) {
   const [fetchingPrice, setFetchingPrice] = useState(false);
   const [value, setValue] = useState<number>();
   const [valueOut, setValueOut] = useState<any>(0);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [networkId, setNetworkId] = useState<any>();
   const [CGTcontractBalance, setCGTcontractBalance] = useState('');
-  const [ratio, setRatio] = useState<any>();
   const { ethereum } = window;
   const { token, setTokenBalance, setCGTBalance, tokenBalance, CGTBalance } =
     useAppContext();
   const { account } = useEthers();
-  const etherBalance = useEtherBalance(account);
 
+  async function getNetworkId() {
+    if (window.ethereum) {
+      const chainId = await getNetwork();
+      console.log(chainId);
+      setNetworkId(chainId['chainId']);
+    }
+  }
   async function getBalance() {
     if (account && token.address) {
       const tokenBalance = await getTokenBalance(token, account);
@@ -81,13 +87,18 @@ export default function Trade({ handleOpenModal }: Props) {
   async function predictPrice() {
     if (account && token.address && value) {
       setFetchingPrice(true);
-      await getPrice(value, account, token).then((data) => {
-        console.log(data);
-        const outputValue = data![1];
-        setValueOut(outputValue);
-        setRatio(data![2]);
+      try {
+        await getPrice(value, account, token).then((data) => {
+          console.log(data);
+          const outputValue = data![1];
+          setValueOut(outputValue);
+          // setRatio(data![2]);
+        });
         setFetchingPrice(false);
-      });
+      } catch (error: any) {
+        setErrorMsg('Something Went wrong, please try again!');
+        setFetchingPrice(false);
+      }
     }
   }
 
@@ -98,7 +109,9 @@ export default function Trade({ handleOpenModal }: Props) {
     getContract();
     predictPrice();
     getBalance();
-  }, [token, value]);
+    getNetworkId();
+    setErrorMsg('');
+  }, [token, value, networkId]);
   return (
     <Box
       w="25rem"
@@ -133,15 +146,15 @@ export default function Trade({ handleOpenModal }: Props) {
       {account && (
         <>
           <Flex alignItems="center" justifyContent="center" bg="#191b1d" py="0">
-            <Box px="5">
+            {/* <Box px="5">
               <Text color="white" fontSize="md">
                 {etherBalance &&
                   parseFloat(formatEther(etherBalance)).toFixed(0)}{' '}
                 ETH
               </Text>
-            </Box>
+            </Box> */}
             <Button
-              onClick={handleOpenModal}
+              // onClick={handleOpenModal}
               bg="#191b1d"
               border="0.06rem solid rgb(247, 248, 250)"
               _hover={{
@@ -172,14 +185,23 @@ export default function Trade({ handleOpenModal }: Props) {
             pt="15px"
           >
             <Box>
-              {CGTcontractBalance && (
-                <Flex alignItems="center" gap="5px">
-                  <Text color="white">
-                    {parseFloat(CGTcontractBalance).toFixed(4)}
+              <Flex direction="column" alignItems="center" gap="5px" px={10}>
+                <Text size="xs" color="#fbd03b">
+                  About this widget? <br />{' '}
+                </Text>
+                <Text fontSize={13} color="white">
+                  A widget for buying CGT using any token at chainlink XAU price
+                  + margin
+                </Text>
+                {console.log(networkId)}
+                {networkId != 137 ? (
+                  <Text fontSize={13} color="red.400">
+                    ⚠ Please switch to polygon mainnet
                   </Text>
-                  <Image height={25} width={25} src={logo} />
-                </Flex>
-              )}
+                ) : (
+                  ''
+                )}
+              </Flex>
             </Box>
           </Flex>
         </>
@@ -345,8 +367,34 @@ export default function Trade({ handleOpenModal }: Props) {
           ) : (
             ''
           )}
+          {errorMsg && (
+            <Text fontSize={15} color="red.400">
+              {errorMsg}
+            </Text>
+          )}
         </Box>
         <SwapButton />
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          bg="#191b1d"
+          py="10px"
+          pt="15px"
+        >
+          <Box>
+            {CGTcontractBalance && (
+              <Flex alignItems="center" gap="5px">
+                <Text color="white">
+                  Contract CGT Balance:{' '}
+                  <span style={{ color: '#fbd03b' }}>
+                    {parseFloat(CGTcontractBalance).toFixed(4)}
+                  </span>
+                </Text>
+                <Image height={25} width={25} src={logo} />
+              </Flex>
+            )}
+          </Box>
+        </Flex>
       </Box>
     </Box>
   );

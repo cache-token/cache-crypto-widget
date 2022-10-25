@@ -4,9 +4,8 @@ import wrapperContractAbi from '../wrapperContract.json';
 import { useAppContext } from './appContext';
 
 export default function SwapButton() {
-  const { activateBrowserWallet, account, library } = useEthers();
+  const { activateBrowserWallet, account } = useEthers();
   const { token } = useAppContext();
-  console.log(token);
 
   function handleConnectWallet() {
     activateBrowserWallet();
