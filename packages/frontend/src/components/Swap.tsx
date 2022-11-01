@@ -133,12 +133,12 @@ export default function Trade({ handleOpenModal }: Props) {
         <Text color="white" fontWeight="500">
           Swap
         </Text>
-        <SettingsIcon
+        {/* <SettingsIcon
           color="white"
           fontSize="1.25rem"
           cursor="pointer"
           _hover={{ color: 'rgb(128,128,128)' }}
-        />
+        /> */}
       </Flex>
       {account && (
         <>
