@@ -115,9 +115,6 @@ export default function Trade({ handleOpenModal }: Props) {
   return (
     <Box
       w="25rem"
-      onClick={() => {
-        if (value && token) swap(token!, account!, value!.toString());
-      }}
       mx="auto"
       mt="5.25rem"
       boxShadow="rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
@@ -373,7 +370,14 @@ export default function Trade({ handleOpenModal }: Props) {
             </Text>
           )}
         </Box>
-        <SwapButton />
+        <div
+          onClick={() => {
+            if (value && token) swap(token!, account!, value!.toString());
+          }}
+        >
+          <SwapButton />
+        </div>
+
         <Flex
           alignItems="center"
           justifyContent="center"
