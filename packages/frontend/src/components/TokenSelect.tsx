@@ -59,39 +59,45 @@ export default function TokenSelect() {
             type="text"
             placeholder="Search.."
             id="myInput"
+            className="dropdown-search"
             onChange={(e) => {
               setSearch(e.target.value);
             }}
           />
-          {tokens
-            .filter((val) => {
-              return (
-                val.symbol.toLowerCase().includes(search.toLowerCase()) &&
-                val.chainId === 137
-              );
-            })
-            .map((val, index) => {
-              return (
-                <div
-                  onClick={async function (e) {
-                    onOptionSelect(val);
-                    setToken(val);
-                    await getTokenBalance(val, account).then((value) => {
-                      console.log(value);
-                    });
-                  }}
-                  key={index}
-                  className="optionContainer"
-                >
-                  {val.logoURI && (
-                    <img className="imageContainer" src={val.logoURI} alt="" />
-                  )}
-                  <a>{val.symbol}</a>
-                  {/* (chain ID:{val.chainId}) */}
-                </div>
-              );
-            })
-            .slice(0, 10)}
+          <div style={{ paddingTop: '30px' }}>
+            {tokens
+              .filter((val) => {
+                return (
+                  val.symbol.toLowerCase().includes(search.toLowerCase()) &&
+                  val.chainId === 137
+                );
+              })
+              .map((val, index) => {
+                return (
+                  <div
+                    onClick={async function (e) {
+                      onOptionSelect(val);
+                      setToken(val);
+                      await getTokenBalance(val, account).then((value) => {
+                        console.log(value);
+                      });
+                    }}
+                    key={index}
+                    className="optionContainer"
+                  >
+                    {val.logoURI && (
+                      <img
+                        className="imageContainer"
+                        src={val.logoURI}
+                        alt=""
+                      />
+                    )}
+                    <a>{val.symbol}</a>
+                    {/* (chain ID:{val.chainId}) */}
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
     </>

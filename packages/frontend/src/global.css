@@ -109,17 +109,24 @@ tbody > tr {
   display: inline-block;
 }
 
+.dropdown-search {
+  position: fixed;
+  width: 228px;
+  border-radius: 1rem;
+}
+
 .dropdown-content {
   border-radius: 1rem;
   height: 200px;
   overflow: auto;
-  width: 50%;
+  width: 200px;
   display: none;
   position: absolute;
   background-color: #ffffff;
   min-width: 230px;
   border: 1px solid #ddd;
   z-index: 100;
+  margin-top: 5px;
 }
 .optionContainer {
   display: flex;
