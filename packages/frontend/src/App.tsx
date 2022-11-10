@@ -7,7 +7,7 @@ import Swap from './components/Swap';
 import '@fontsource/inter';
 import './global.css';
 import { Token } from './components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppContext from './components/appContext';
 
 function App() {
@@ -21,6 +21,8 @@ function App() {
   });
   const [tBal, setTBal] = useState('');
   const [CGTBal, setCGTBal] = useState('');
+  const [value, setValue] = useState<number>(0);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const values = {
     token: t,
@@ -29,8 +31,20 @@ function App() {
     CGTBalance: CGTBal,
     setTokenBalance: setTBal,
     setCGTBalance: setCGTBal,
+    value: value,
+    setValue: setValue,
+    errorMsg: errorMsg,
+    setErrorMsg: setErrorMsg,
   };
+  useEffect(() => {
+    if (errorMsg) {
+      const timer = setTimeout(() => {
+        setErrorMsg('');
+      }, 5000);
 
+      return () => clearTimeout(timer);
+    }
+  }, [errorMsg]);
   return (
     <AppContext.Provider value={values}>
       <ChakraProvider theme={theme}>

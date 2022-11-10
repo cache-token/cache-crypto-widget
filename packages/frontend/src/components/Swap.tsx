@@ -8,7 +8,7 @@ import {
   useDisclosure,
   Spinner,
 } from '@chakra-ui/react';
-import { SettingsIcon, ChevronDownIcon, ArrowDownIcon } from '@chakra-ui/icons';
+import { ArrowDownIcon } from '@chakra-ui/icons';
 import SwapButton from './SwapButton';
 import TokenSelect from './TokenSelect';
 // import TokenModal from './Modal/TokenModal';
@@ -25,7 +25,6 @@ import {
   swap,
   getNetwork,
 } from '../services/v3service';
-import { ethers } from 'ethers';
 
 type Props = {
   handleOpenModal: any;
@@ -33,14 +32,21 @@ type Props = {
 export default function Trade({ handleOpenModal }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [fetchingPrice, setFetchingPrice] = useState(false);
-  const [value, setValue] = useState<number>();
   const [valueOut, setValueOut] = useState<any>(0);
-  const [errorMsg, setErrorMsg] = useState('');
   const [networkId, setNetworkId] = useState<any>();
   const [CGTcontractBalance, setCGTcontractBalance] = useState('');
   const { ethereum } = window;
-  const { token, setTokenBalance, setCGTBalance, tokenBalance, CGTBalance } =
-    useAppContext();
+  const {
+    token,
+    setTokenBalance,
+    setCGTBalance,
+    tokenBalance,
+    CGTBalance,
+    value,
+    setValue,
+    errorMsg,
+    setErrorMsg,
+  } = useAppContext();
   const { account } = useEthers();
 
   async function getNetworkId() {
@@ -67,21 +73,15 @@ export default function Trade({ handleOpenModal }: Props) {
     if (ethereum && token.address) {
       const contract = gettoken0Contract(token.address);
       console.log(contract);
-      //   try {
-      //     const transaction = await contract.safeMint(account, metadata, {
-      //       gasLimit: 550000,
-      //     });
-      //     await transaction.wait().then(() => {
-      //       notify('success', 'Transaction successful!');
-      //     });
-      //   } catch (error) {
-      //     notify('error', 'Something went wrong, please try again!');
-      //   }
-
-      //   console.log(metadata);
-      // } else {
-      //   notify('error', 'Please connect your wallet!');
-      // }
+    }
+  }
+  async function swapTokens({ token, account, value }: any) {
+    if (value && token && parseFloat(tokenBalance) >= value) {
+      try {
+        await swap(token!, account!, value!.toString());
+      } catch (error) {
+        setErrorMsg('Something went wrong, Please try again!');
+      }
     }
   }
   async function predictPrice() {
@@ -112,6 +112,7 @@ export default function Trade({ handleOpenModal }: Props) {
     getNetworkId();
     setErrorMsg('');
   }, [token, value, networkId]);
+
   return (
     <Box
       w="25rem"
@@ -130,9 +131,6 @@ export default function Trade({ handleOpenModal }: Props) {
         justifyContent="space-between"
         borderRadius="1.37rem 1.37rem 0 0"
       >
-        <Text color="white" fontWeight="500">
-          Swap
-        </Text>
         {/* <SettingsIcon
           color="white"
           fontSize="1.25rem"
@@ -231,7 +229,7 @@ export default function Trade({ handleOpenModal }: Props) {
               focusBorderColor="none"
               type="number"
               color="white"
-              disabled={fetchingPrice}
+              // disabled={fetchingPrice}
               onChange={function (e) {
                 if (e.target.value !== undefined) {
                   setValue(parseFloat(e.target.value));
@@ -372,7 +370,7 @@ export default function Trade({ handleOpenModal }: Props) {
         </Box>
         <div
           onClick={() => {
-            if (value && token) swap(token!, account!, value!.toString());
+            swapTokens({ token, account, value });
           }}
         >
           <SwapButton />
