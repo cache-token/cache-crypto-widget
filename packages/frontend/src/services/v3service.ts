@@ -101,7 +101,7 @@ export const swap = async (
       console.log(txRes);
     });
 
-  WContract.connect(signer).swapTokensForCGT(
+  const tx = await WContract.connect(signer).swapTokensForCGT(
     token.address,
     3000,
     ethers.utils
@@ -110,6 +110,8 @@ export const swap = async (
     0,
     0
   );
+  const receipt = await tx.wait();
+  return receipt;
 };
 export const getPrice = async (
   inputAmount: number,

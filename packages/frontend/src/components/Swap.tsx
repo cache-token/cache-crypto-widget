@@ -5,7 +5,6 @@ import {
   Text,
   Button,
   Input,
-  useDisclosure,
   Spinner,
 } from '@chakra-ui/react';
 import { ArrowDownIcon } from '@chakra-ui/icons';
@@ -25,16 +24,19 @@ import {
   swap,
   getNetwork,
 } from '../services/v3service';
+import AlertMessage from './AlertMessage';
 
 type Props = {
   handleOpenModal: any;
 };
 export default function Trade({ handleOpenModal }: Props) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   const [fetchingPrice, setFetchingPrice] = useState(false);
   const [valueOut, setValueOut] = useState<any>(0);
   const [networkId, setNetworkId] = useState<any>();
   const [CGTcontractBalance, setCGTcontractBalance] = useState('');
+  const [txStatus, setTxStatus] = useState(false);
+  const [txLoading, setTxLoading] = useState(false);
   const { ethereum } = window;
   const {
     token,
@@ -44,8 +46,8 @@ export default function Trade({ handleOpenModal }: Props) {
     CGTBalance,
     value,
     setValue,
-    errorMsg,
-    setErrorMsg,
+    alertMsg,
+    setalertMsg,
   } = useAppContext();
   const { account } = useEthers();
 
@@ -78,9 +80,17 @@ export default function Trade({ handleOpenModal }: Props) {
   async function swapTokens({ token, account, value }: any) {
     if (value && token && parseFloat(tokenBalance) >= value) {
       try {
-        await swap(token!, account!, value!.toString());
+        setTxLoading(true);
+        await swap(token!, account!, value!.toString()).then((data) => {
+          if (data.status === 1) {
+            setTxStatus(true);
+            setalertMsg('Transaction Successful! ');
+            setTxLoading(false);
+          }
+        });
       } catch (error) {
-        setErrorMsg('Something went wrong, Please try again!');
+        setTxLoading(false);
+        setalertMsg('Something went wrong, Please try again!');
       }
     }
   }
@@ -96,13 +106,13 @@ export default function Trade({ handleOpenModal }: Props) {
         });
         setFetchingPrice(false);
       } catch (error: any) {
-        setErrorMsg('Something Went wrong, please try again!');
+        setalertMsg('Something Went wrong, please try again!');
         setFetchingPrice(false);
       }
     }
   }
 
-  if (CGTcontractBalance == '' && CGTBalance == '') {
+  if (CGTcontractBalance === '' && CGTBalance === '') {
     getCGTBalanceFunc();
   }
   useEffect(() => {
@@ -110,8 +120,18 @@ export default function Trade({ handleOpenModal }: Props) {
     predictPrice();
     getBalance();
     getNetworkId();
-    setErrorMsg('');
+    setalertMsg('');
   }, [token, value, networkId]);
+
+  useEffect(() => {
+    if (txStatus) {
+      const timer = setTimeout(() => {
+        setTxStatus(false);
+      }, 6000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [txStatus]);
 
   return (
     <Box
@@ -189,7 +209,7 @@ export default function Trade({ handleOpenModal }: Props) {
                   + margin
                 </Text>
                 {console.log(networkId)}
-                {networkId != 137 ? (
+                {networkId !== 137 ? (
                   <Text fontSize={13} color="red.400">
                     ⚠ Please switch to polygon mainnet
                   </Text>
@@ -218,6 +238,7 @@ export default function Trade({ handleOpenModal }: Props) {
             <Input
               // defaultValue={value}
               placeholder="0.0"
+              value={value}
               fontWeight="500"
               fontSize="1.5rem"
               width="100%"
@@ -359,13 +380,18 @@ export default function Trade({ handleOpenModal }: Props) {
               <Spinner size="sm" color="#fbd03b" />
               <Text color="white">fetching price...</Text>
             </Flex>
+          ) : txLoading ? (
+            <Flex alignItems="center" gap="5px">
+              <Spinner size="sm" color="#fbd03b" />
+              <Text color="white">Tx on progress...</Text>
+            </Flex>
           ) : (
             ''
           )}
-          {errorMsg && (
-            <Text fontSize={15} color="red.400">
-              {errorMsg}
-            </Text>
+          {txStatus ? (
+            <AlertMessage type={'SUCCESS'} message={alertMsg} />
+          ) : (
+            <AlertMessage message={alertMsg} />
           )}
         </Box>
         <div

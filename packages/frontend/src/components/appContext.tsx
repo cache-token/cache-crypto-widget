@@ -15,8 +15,8 @@ const AppContext = React.createContext<globalState>({
   setTokenBalance: () => {},
   value: 0,
   setValue: () => {},
-  errorMsg: '',
-  setErrorMsg: () => {},
+  alertMsg: '',
+  setalertMsg: () => {},
 });
 export const useAppContext = () => useContext(AppContext);
 export default AppContext;

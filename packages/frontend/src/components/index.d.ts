@@ -10,8 +10,8 @@ export interface globalState {
   value: number;
   tokenBalance: string;
   CGTBalance: string;
-  errorMsg: string;
-  setErrorMsg: React.Dispatch<React.SetStateAction<string>>;
+  alertMsg: string;
+  setalertMsg: React.Dispatch<React.SetStateAction<string>>;
   setToken: React.Dispatch<React.SetStateAction<Token>>;
   setTokenBalance: React.Dispatch<React.SetStateAction<string>>;
   setCGTBalance: React.Dispatch<React.SetStateAction<string>>;
