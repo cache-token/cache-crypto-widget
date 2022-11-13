@@ -3,10 +3,9 @@ import { useEtherBalance, useEthers } from '@usedapp/core';
 import wrapperContractAbi from '../wrapperContract.json';
 import { useAppContext } from './appContext';
 
-export default function SwapButton() {
+export default function SwapButton({ txLoading }: any) {
   const { activateBrowserWallet, account } = useEthers();
   const { token, tokenBalance, value } = useAppContext();
-  console.log(value);
   function handleConnectWallet() {
     activateBrowserWallet();
   }
@@ -46,6 +45,7 @@ export default function SwapButton() {
             bg="#fbd03b"
             width="100%"
             p="1.62rem"
+            disabled={value === 0 || txLoading}
             borderRadius="1.25rem"
             _hover={{ bg: '#fbd03bbf' }}
           >

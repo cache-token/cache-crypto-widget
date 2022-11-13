@@ -19,8 +19,6 @@ export default function TokenSelect() {
       const data = res.data.tokens.filter((val: any) => {
         return val.chainId === 137;
       });
-
-      console.log(data);
       setTokens(data);
     });
   }, []);
@@ -71,9 +69,9 @@ export default function TokenSelect() {
                     onClick={async function (e) {
                       onOptionSelect(val);
                       setToken(val);
-                      await getTokenBalance(val, account).then((value) => {
-                        console.log(value);
-                      });
+                      // await getTokenBalance(val, account).then((value) => {
+                      //   console.log(value);
+                      // });
                     }}
                     key={index}
                     className="optionContainer"

@@ -46,7 +46,6 @@ export const getTokenBalance = async (token: any, account: any) => {
       const XtokenContract = gettoken0Contract(token.address);
 
       const xTokenBalance = await XtokenContract.balanceOf(account);
-      console.log(ethers.utils.formatUnits(xTokenBalance, token.decimals));
       return ethers.utils.formatUnits(xTokenBalance, token.decimals);
     } catch (error) {
       console.log(error);
@@ -93,8 +92,6 @@ export const swap = async (
     wrapperContract.abi,
     signer
   );
-  console.log(await WContract.stable());
-  console.log(XtokenContract);
   await XtokenContract.connect(signer)
     .approve(WrapperContract, ethers.utils.parseEther(amount.toString()))
     .then(async (txRes: any) => {
