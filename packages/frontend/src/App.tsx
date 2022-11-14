@@ -1,7 +1,7 @@
 import { ChakraProvider, useDisclosure } from '@chakra-ui/react';
 import theme from './theme';
-import Header from './components/Header';
-import ConnectButton from './components/ConnectButton';
+// import Header from './components/Header';
+// import ConnectButton from './components/ConnectButton';
 import AccountModal from './components/Modal/AccountModal';
 import Swap from './components/Swap';
 import '@fontsource/inter';
@@ -22,7 +22,7 @@ function App() {
   const [tBal, setTBal] = useState('');
   const [CGTBal, setCGTBal] = useState('');
   const [value, setValue] = useState<number>(0);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [alertMsg, setalertMsg] = useState('');
 
   const values = {
     token: t,
@@ -33,18 +33,18 @@ function App() {
     setCGTBalance: setCGTBal,
     value: value,
     setValue: setValue,
-    errorMsg: errorMsg,
-    setErrorMsg: setErrorMsg,
+    alertMsg: alertMsg,
+    setalertMsg: setalertMsg,
   };
   useEffect(() => {
-    if (errorMsg) {
+    if (alertMsg) {
       const timer = setTimeout(() => {
-        setErrorMsg('');
+        setalertMsg('');
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [errorMsg]);
+  }, [alertMsg]);
   return (
     <AppContext.Provider value={values}>
       <ChakraProvider theme={theme}>

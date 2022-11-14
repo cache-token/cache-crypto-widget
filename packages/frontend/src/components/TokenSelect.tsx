@@ -13,22 +13,12 @@ export default function TokenSelect() {
   const { chainId, account } = useEthers();
   const { setToken } = useAppContext();
   // const signer = library!.getSigner();
-  const testWETH = {
-    name: 'TestWETH',
-    address: '0xf298e212e92Dc2f0859309B5C5E9fDD3E29a9737',
-    symbol: 'TWETH',
-    decimals: 18,
-    chainId: 4,
-    logoURI:
-      'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
-  };
+
   useEffect(() => {
     Axios.get(`https://tokens.uniswap.org/`).then((res) => {
       const data = res.data.tokens.filter((val: any) => {
         return val.chainId === 137;
       });
-      data.push(testWETH);
-      console.log(data);
       setTokens(data);
     });
   }, []);
@@ -69,7 +59,8 @@ export default function TokenSelect() {
               .filter((val) => {
                 return (
                   val.symbol.toLowerCase().includes(search.toLowerCase()) &&
-                  val.chainId === 137
+                  val.chainId === 137 &&
+                  val.symbol !== 'MATIC'
                 );
               })
               .map((val, index) => {
@@ -78,9 +69,9 @@ export default function TokenSelect() {
                     onClick={async function (e) {
                       onOptionSelect(val);
                       setToken(val);
-                      await getTokenBalance(val, account).then((value) => {
-                        console.log(value);
-                      });
+                      // await getTokenBalance(val, account).then((value) => {
+                      //   console.log(value);
+                      // });
                     }}
                     key={index}
                     className="optionContainer"

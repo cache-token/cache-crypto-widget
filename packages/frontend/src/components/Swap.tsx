@@ -5,7 +5,6 @@ import {
   Text,
   Button,
   Input,
-  useDisclosure,
   Spinner,
 } from '@chakra-ui/react';
 import { ArrowDownIcon } from '@chakra-ui/icons';
@@ -25,16 +24,19 @@ import {
   swap,
   getNetwork,
 } from '../services/v3service';
+import AlertMessage from './AlertMessage';
 
 type Props = {
   handleOpenModal: any;
 };
 export default function Trade({ handleOpenModal }: Props) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   const [fetchingPrice, setFetchingPrice] = useState(false);
   const [valueOut, setValueOut] = useState<any>(0);
   const [networkId, setNetworkId] = useState<any>();
   const [CGTcontractBalance, setCGTcontractBalance] = useState('');
+  const [txStatus, setTxStatus] = useState(false);
+  const [txLoading, setTxLoading] = useState(false);
   const { ethereum } = window;
   const {
     token,
@@ -44,15 +46,14 @@ export default function Trade({ handleOpenModal }: Props) {
     CGTBalance,
     value,
     setValue,
-    errorMsg,
-    setErrorMsg,
+    alertMsg,
+    setalertMsg,
   } = useAppContext();
   const { account } = useEthers();
 
   async function getNetworkId() {
     if (window.ethereum) {
       const chainId = await getNetwork();
-      console.log(chainId);
       setNetworkId(chainId['chainId']);
     }
   }
@@ -72,15 +73,21 @@ export default function Trade({ handleOpenModal }: Props) {
   async function getContract() {
     if (ethereum && token.address) {
       const contract = gettoken0Contract(token.address);
-      console.log(contract);
     }
   }
   async function swapTokens({ token, account, value }: any) {
     if (value && token && parseFloat(tokenBalance) >= value) {
       try {
-        await swap(token!, account!, value!.toString());
+        setTxLoading(true);
+        const data = await swap(token!, account!, value!.toString());
+        if (data.status === 1) {
+          setTxStatus(true);
+          setalertMsg('Transaction Successful ! ');
+          setTxLoading(false);
+        }
       } catch (error) {
-        setErrorMsg('Something went wrong, Please try again!');
+        setTxLoading(false);
+        setalertMsg('Something went wrong, Please try again !');
       }
     }
   }
@@ -89,20 +96,20 @@ export default function Trade({ handleOpenModal }: Props) {
       setFetchingPrice(true);
       try {
         await getPrice(value, account, token).then((data) => {
-          console.log(data);
           const outputValue = data![1];
           setValueOut(outputValue);
+          // console.log('ratio', 1 / parseFloat(data[2].toString()));
           // setRatio(data![2]);
         });
         setFetchingPrice(false);
       } catch (error: any) {
-        setErrorMsg('Something Went wrong, please try again!');
+        setalertMsg('Something Went wrong, please try again!');
         setFetchingPrice(false);
       }
     }
   }
 
-  if (CGTcontractBalance == '' && CGTBalance == '') {
+  if (!CGTcontractBalance && !CGTBalance) {
     getCGTBalanceFunc();
   }
   useEffect(() => {
@@ -110,8 +117,18 @@ export default function Trade({ handleOpenModal }: Props) {
     predictPrice();
     getBalance();
     getNetworkId();
-    setErrorMsg('');
+    setalertMsg('');
   }, [token, value, networkId]);
+
+  useEffect(() => {
+    if (txStatus) {
+      const timer = setTimeout(() => {
+        setTxStatus(false);
+      }, 6000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [txStatus]);
 
   return (
     <Box
@@ -139,68 +156,67 @@ export default function Trade({ handleOpenModal }: Props) {
         /> */}
       </Flex>
       {account && (
-        <>
-          <Flex alignItems="center" justifyContent="center" bg="#191b1d" py="0">
-            {/* <Box px="5">
+        <Flex alignItems="center" justifyContent="center" bg="#191b1d" py="0">
+          {/* <Box px="5">
               <Text color="white" fontSize="md">
                 {etherBalance &&
                   parseFloat(formatEther(etherBalance)).toFixed(0)}{' '}
                 ETH
               </Text>
             </Box> */}
-            <Button
-              // onClick={handleOpenModal}
-              bg="#191b1d"
-              border="0.06rem solid rgb(247, 248, 250)"
-              _hover={{
-                border: '0.06rem',
-                borderStyle: 'solid',
-                borderColor: 'rgb(211,211,211)',
-              }}
-              borderRadius="xl"
-              m="0.06rem"
-              px={3}
-              h="2.37rem"
-            >
-              <Text color="white" fontSize="md" fontWeight="medium" mr="2">
-                {account &&
-                  `${account.slice(0, 6)}...${account.slice(
-                    account.length - 4,
-                    account.length
-                  )}`}
-              </Text>
-              <Identicon />
-            </Button>
-          </Flex>
-          <Flex
-            alignItems="center"
-            justifyContent="center"
+
+          <Button
+            // onClick={handleOpenModal}
             bg="#191b1d"
-            py="10px"
-            pt="15px"
+            border="0.06rem solid rgb(247, 248, 250)"
+            _hover={{
+              border: '0.06rem',
+              borderStyle: 'solid',
+              borderColor: 'rgb(211,211,211)',
+            }}
+            borderRadius="xl"
+            m="0.06rem"
+            px={3}
+            h="2.37rem"
           >
-            <Box>
-              <Flex direction="column" alignItems="center" gap="5px" px={10}>
-                <Text size="xs" color="#fbd03b">
-                  About this widget? <br />{' '}
-                </Text>
-                <Text fontSize={13} color="white">
-                  A widget for buying CGT using any token at chainlink XAU price
-                  + margin
-                </Text>
-                {console.log(networkId)}
-                {networkId != 137 ? (
-                  <Text fontSize={13} color="red.400">
-                    ⚠ Please switch to polygon mainnet
-                  </Text>
-                ) : (
-                  ''
-                )}
-              </Flex>
-            </Box>
-          </Flex>
-        </>
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              {account &&
+                `${account.slice(0, 6)}...${account.slice(
+                  account.length - 4,
+                  account.length
+                )}`}
+            </Text>
+            <Identicon />
+          </Button>
+        </Flex>
       )}
+
+      <Flex
+        alignItems="center"
+        justifyContent="center"
+        bg="#191b1d"
+        py="10px"
+        pt="15px"
+      >
+        <Box>
+          <Flex direction="column" alignItems="center" gap="5px" px={10}>
+            <Text size="xs" color="#fbd03b">
+              CGT Widget <br />{' '}
+            </Text>
+            <Text fontSize={13} color="white">
+              A widget for buying CGT using any token at chainlink XAU price +
+              margin
+            </Text>
+            {networkId !== 137 ? (
+              <Text fontSize={13} color="red.400">
+                ⚠ Please switch to polygon mainnet
+              </Text>
+            ) : (
+              ''
+            )}
+          </Flex>
+        </Box>
+      </Flex>
 
       <Box p="1rem" bg="#191b1d" borderRadius="0 0 1.37rem 1.37rem">
         <Flex
@@ -218,6 +234,7 @@ export default function Trade({ handleOpenModal }: Props) {
             <Input
               // defaultValue={value}
               placeholder="0.0"
+              value={value}
               fontWeight="500"
               fontSize="1.5rem"
               width="100%"
@@ -359,13 +376,18 @@ export default function Trade({ handleOpenModal }: Props) {
               <Spinner size="sm" color="#fbd03b" />
               <Text color="white">fetching price...</Text>
             </Flex>
+          ) : txLoading ? (
+            <Flex alignItems="center" gap="5px">
+              <Spinner size="sm" color="#fbd03b" />
+              <Text color="white">Transaction is in progress...</Text>
+            </Flex>
           ) : (
             ''
           )}
-          {errorMsg && (
-            <Text fontSize={15} color="red.400">
-              {errorMsg}
-            </Text>
+          {txStatus ? (
+            <AlertMessage type={'SUCCESS'} message={alertMsg} />
+          ) : (
+            <AlertMessage message={alertMsg} />
           )}
         </Box>
         <div
@@ -373,7 +395,7 @@ export default function Trade({ handleOpenModal }: Props) {
             swapTokens({ token, account, value });
           }}
         >
-          <SwapButton />
+          <SwapButton txLoading={txLoading} />
         </div>
 
         <Flex
