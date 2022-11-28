@@ -30,7 +30,6 @@ export default function TokenModal({ isOpen, onClose }: Props) {
       setCrypto(res.data.tokens);
     });
   }, []);
-  console.log(crypto);
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
       <ModalOverlay />

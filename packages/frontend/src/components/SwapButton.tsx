@@ -25,7 +25,7 @@ export default function SwapButton({ txLoading }: any) {
             Insufficent Balance
           </Button>
         </Box>
-      ) : value === 0 ? (
+      ) : !value ? (
         <Box mt="0.5rem">
           <Button
             color="black"

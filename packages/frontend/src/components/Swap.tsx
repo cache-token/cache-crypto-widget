@@ -33,7 +33,7 @@ export default function Trade({ handleOpenModal }: Props) {
   // const { isOpen, onOpen, onClose } = useDisclosure();
   const [fetchingPrice, setFetchingPrice] = useState(false);
   const [valueOut, setValueOut] = useState<any>(0);
-  const [networkId, setNetworkId] = useState<any>();
+  const [networkId, setNetworkId] = useState<any>(137);
   const [CGTcontractBalance, setCGTcontractBalance] = useState('');
   const [txStatus, setTxStatus] = useState(false);
   const [txLoading, setTxLoading] = useState(false);
@@ -113,6 +113,13 @@ export default function Trade({ handleOpenModal }: Props) {
     getCGTBalanceFunc();
   }
   useEffect(() => {
+    if (!value) setValueOut(0);
+    //Refresh page on chainChanged event
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', () => {
+        window.location.reload();
+      });
+    }
     getContract();
     predictPrice();
     getBalance();
