@@ -9,7 +9,7 @@ const ContractAddresses = config.ContractAddresses;
 const SwapRouterAddress = config.SwapRouterAddress;
 
 const margin = 50;
-const deployNetwork = "rinkeby";
+const deployNetwork = "mumbai";
 
 async function main() {
   const _Wrapper = await ethers.getContractFactory("WrapperContract");

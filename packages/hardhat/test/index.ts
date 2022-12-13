@@ -5,7 +5,6 @@ import { ethers, network } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import { WrapperContract, ERC20 } from "../typechain-types";
-//import { ContractAddresses, SwapRouterAddress } from "../Addresses";
 import config from "../config/config.dev.json";
 
 const ContractAddresses = config.ContractAddresses;
@@ -22,6 +21,7 @@ describe("Wrapper contract test", function () {
   let deployer: Wallet,
     cgtHolder: Signer,
     xTokenHolder: Signer,
+    stableTokenHolder: Signer,
     wrapper: WrapperContract,
     cacheGold: ERC20,
     stable: ERC20,
@@ -57,11 +57,18 @@ describe("Wrapper contract test", function () {
       method: "hardhat_impersonateAccount",
       params: [ContractAddresses[testNetwork].XToken_Holder],
     });
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [ContractAddresses[testNetwork].stableToken_Holder],
+    });
     cgtHolder = await ethers.getSigner(
       ContractAddresses[testNetwork].CGT_Holder
     );
     xTokenHolder = await ethers.getSigner(
       ContractAddresses[testNetwork].XToken_Holder
+    );
+    stableTokenHolder = await ethers.getSigner(
+      ContractAddresses[testNetwork].stableToken_Holder
     );
   };
 
@@ -184,13 +191,13 @@ describe("Wrapper contract test", function () {
     expect(
       parseFloat(
         (quote.toNumber() / 10 ** (await cacheGold.decimals())).toFixed(
-          await cacheGold.decimals()
+          await cacheGold.decimals() - 1
         )
       )
     ).to.equal(
       parseFloat(
         ((amount * (1 - margin / 10000)) / price).toFixed(
-          await cacheGold.decimals()
+          await cacheGold.decimals() - 1
         )
       )
     );
@@ -303,9 +310,51 @@ describe("Wrapper contract test", function () {
         )
     ).to.emit(wrapper, "SwappedTokensForCGT");
   });
+
   it("10. stabletoken address can be set by owner", async function () {
     const USDT_Address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     await wrapper.setStable(USDT_Address);
     expect(await wrapper.stable()).to.equal(USDT_Address);
+  });
+
+  it("11. swap is bypassed for stabletoken", async function () {
+    const amount = 10;
+    const initialCGTBalance = (
+      await cacheGold.balanceOf(await stableTokenHolder.getAddress())
+    ).toNumber();
+    const initialUSDCBalance = (
+      await stable.balanceOf(wrapper.address)
+    ).toNumber();
+
+    await stable
+      .connect(stableTokenHolder)
+      .approve(wrapper.address, ethers.utils.parseEther(amount.toString()));
+    await expect(
+      wrapper
+        .connect(stableTokenHolder)
+        .swapTokensForCGT(
+          ContractAddresses[testNetwork].USDC_Address,
+          3000,
+          ethers.utils
+            .parseEther(amount.toString())
+            .div(10 ** (18 - (await stable.decimals()))),
+          0,
+          0
+        )
+    ).to.emit(wrapper, "SwappedTokensForCGT");
+
+    const finalCGTBalance = (
+      await cacheGold.balanceOf(await stableTokenHolder.getAddress())
+    ).toNumber();
+    const finalUSDCBalance = (
+      await stable.balanceOf(wrapper.address)
+    ).toNumber();
+
+    expect(
+      (finalCGTBalance - initialCGTBalance) / 10 ** (await cacheGold.decimals())
+    ).to.be.above(0);
+    expect(
+      (finalUSDCBalance - initialUSDCBalance) / 10 ** (await stable.decimals())
+    ).to.be.above(0);
   });
 });

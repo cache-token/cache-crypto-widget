@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -112,24 +113,30 @@ contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
     ) 
         private
     {
+        uint256 amountStable;
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
-        TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
-        ISwapRouter.ExactInputSingleParams memory params =
-            ISwapRouter.ExactInputSingleParams({
-                tokenIn: tokenIn,
-                tokenOut: address(stable),
-                fee: poolFee,
-                recipient: address(this),
-                deadline: block.timestamp,
-                amountIn: amountIn,
-                amountOutMinimum: stableAmountOutMinimum,
-                sqrtPriceLimitX96: sqrtPriceLimitX96
-            });
-        uint256 amountOut = swapRouter.exactInputSingle(params);
-        totalFeesCollected += (amountOut * margin) / 10000;
-        uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        if (tokenIn != address(stable)) {
+            TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
+
+            ISwapRouter.ExactInputSingleParams memory params =
+                ISwapRouter.ExactInputSingleParams({
+                    tokenIn: tokenIn,
+                    tokenOut: address(stable),
+                    fee: poolFee,
+                    recipient: address(this),
+                    deadline: block.timestamp,
+                    amountIn: amountIn,
+                    amountOutMinimum: stableAmountOutMinimum,
+                    sqrtPriceLimitX96: sqrtPriceLimitX96
+                });
+            amountStable = swapRouter.exactInputSingle(params);
+        } else {
+            amountStable = amountIn;
+        }
+        totalFeesCollected += (amountStable * margin) / 10000;
+        uint256 netStableTokenAmount = (amountStable * (10000 - margin)) / 10000;
+        uint256 CGTAmount = (netStableTokenAmount * 311034768 * (10**3)) / uint256(getLatestXAU_USDPrice());
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
@@ -153,7 +160,7 @@ contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
      */
     function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
         uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        uint256 CGTAmount = (netStableTokenAmount * 311034768 * (10**3)) / uint256(getLatestXAU_USDPrice());
         return CGTAmount;
     }
 
