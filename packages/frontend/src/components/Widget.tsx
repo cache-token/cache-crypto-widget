@@ -45,7 +45,7 @@ const Widget = () => {
   const [isFetchingCgtAmount, setIsFetchingCgtAmount] = useState<boolean>(false);
   const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState<boolean>(false);
   const [isTryAgain, setIsTryAgain] = useState<boolean>(false);
-  const [isSplitCompleted, setIsSplitCompleted] = useState<boolean>(false);
+  const [isSwapCompleted, setIsSwapCompleted] = useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [disableForm, setDisableForm] = useState<boolean>(false);
   
@@ -220,7 +220,7 @@ const Widget = () => {
       setConfirmationStep(0);
       setIsConfirmation(true);
       setIsTryAgain(false);
-      setIsSplitCompleted(false);
+      setIsSwapCompleted(false);
       setConfirmationMessage('Waiting for transaction confirmation...');
       tokenContract.approve(config.CONTRACTS_ADDRESS.Wrapper, parseUnits(amountControl.value.toString(), decimals))
         .then((transactionResponse: TransactionResponse) => {
@@ -263,7 +263,7 @@ const Widget = () => {
     setConfirmationStep(1);
     setIsConfirmation(true);
     setIsTryAgain(false);
-    setIsSplitCompleted(false);
+    setIsSwapCompleted(false);
     setConfirmationMessage('Waiting for transaction confirmation...');
     const wrapperContract = getContractByName('Wrapper', signer as any);
     wrapperContract.swapTokensForCGT(tokenControl.value?.address, 3000, parseUnits(amountControl.value.toString(), decimals), 0, 0)
@@ -287,8 +287,8 @@ const Widget = () => {
     if (status === 1) {
       setTimeout(() => {
         setDisableForm(false);
-        setIsSplitCompleted(true);
-        setConfirmationMessage('Split Success!');
+        setIsSwapCompleted(true);
+        setConfirmationMessage('Transaction Success!');
         setConfirmationStep(2);
         setAmountControl({
           value: '',
@@ -298,7 +298,7 @@ const Widget = () => {
           isOpen: true,
           timeOut: 5000,
           type: 'success',
-          message: 'Split Success!'
+          message: 'Transaction Success!'
         });
         getTokenBalance();
       }, 6000)
@@ -308,7 +308,7 @@ const Widget = () => {
         isOpen: true,
         timeOut: 5000,
         type: 'error',
-        message: 'Split failed'
+        message: 'Transaction failed'
       });
     }
   }
@@ -482,10 +482,10 @@ const Widget = () => {
             </IconButton>
           </div>
           <div className="TransactionsConfirmationContentContainer">
-            {!isTryAgain && !isSplitCompleted ?
+            {!isTryAgain && !isSwapCompleted ?
               <CircularProgress color="secondary" size={50} /> : <></>
             }
-            {isSplitCompleted ?
+            {isSwapCompleted ?
               <CheckCircleIcon className="CompletedColor" fontSize="large" /> : <></>
             }
             {isTryAgain ?
@@ -497,7 +497,7 @@ const Widget = () => {
                 <StepLabel>Approve Amount</StepLabel>
               </Step>
               <Step>
-                <StepLabel>Split Token</StepLabel>
+                <StepLabel>Swap Token</StepLabel>
               </Step>
             </Stepper>
           </div>
