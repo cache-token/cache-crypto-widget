@@ -18,9 +18,6 @@
     "deployr": "npm run deployr -w @cache-crypto-widget/hardhat"
   },
   "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
     "nohoist": [
       "**/hardhat",
       "**/frontend",
