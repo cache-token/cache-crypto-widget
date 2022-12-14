@@ -1,29 +1,17 @@
+import './assets/styles/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import { DAppProvider } from '@usedapp/core';
-import { ApolloProvider } from 'react-apollo';
-import { ApolloClient } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { HttpLink } from 'apollo-link-http';
-import { getAppConfig } from './helpers';
-import { IAppConfig } from './models';
-
-const config: IAppConfig = getAppConfig();
-const client = new ApolloClient({
-  link: new HttpLink({
-    uri: config.UNISWAP_SUBGRAPH,
-  }),
-  cache: new InMemoryCache(),
-});
+import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <DAppProvider config={{}}>
-      <ApolloProvider client={client}>
-        <App />
-      </ApolloProvider>
-    </DAppProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
