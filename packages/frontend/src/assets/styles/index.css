@@ -39,3 +39,8 @@ code {
 .Mui-selected {
   background-color: rgb(255 193 7 / 43%) !important;
 }
+
+.MuiStepLabel-root
+.Mui-completed {
+  color: #FFFFFF !important;
+}
