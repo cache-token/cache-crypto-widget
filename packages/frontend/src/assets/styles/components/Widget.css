@@ -132,6 +132,8 @@
 .WidgetActions {
   align-items: center;
   display: flex;
+  flex-direction: column;
+  gap: .5rem;
   justify-content: center;
   width: 100%;
 }
@@ -151,4 +153,9 @@
 
 .WidgetContainer img {
   border-radius: 50%;
+}
+
+.WidgetErrorMessage {
+  color: #d32f2f;
+  font-size: .8rem;
 }

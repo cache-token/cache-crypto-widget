@@ -39,6 +39,8 @@ const Widget = () => {
   const { data: signer } = useSigner();
 
   const [isNotEnoughBalance, setIsNotEnoughBalance] = useState<boolean>(false);
+  const [isExceedBalance, setIsExceedBalance] = useState<boolean>(false);
+  const [isNotSupportedToken, setIsNotSupportedToken] = useState<boolean>(false);
   const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
   const [isFetchingCgtAmount, setIsFetchingCgtAmount] = useState<boolean>(false);
   const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState<boolean>(false);
@@ -74,7 +76,14 @@ const Widget = () => {
   });
 
   const { data: cgtBalanceData } = useBalance({
-    addressOrName: address + '',
+    addressOrName: address?.toString(),
+    token: config.CONTRACTS_ADDRESS.CGT,
+    chainId: config.NETWORK.CHAIN_ID,
+    watch: true
+  });
+
+  const { data: cgtWrapperBalanceData } = useBalance({
+    addressOrName: config.CONTRACTS_ADDRESS.Wrapper,
     token: config.CONTRACTS_ADDRESS.CGT,
     chainId: config.NETWORK.CHAIN_ID,
     watch: true
@@ -106,11 +115,21 @@ const Widget = () => {
       getTokenBalance();
     }
     // eslint-disable-next-line
+  }, [tokenControl, address]);
+
+  useEffect(() => {
+    if (tokenControl.value) {
+      setIsExceedBalance(false);
+      setIsNotSupportedToken(false);
+      setCgtReceive(0);
+    }
+    // eslint-disable-next-line
   }, [tokenControl]);
 
   useEffect(() => {
     if (+amountControl.value) {
-      getPrice();
+      const timeOutId = setTimeout(() => getPrice(), 500);
+      return () => clearTimeout(timeOutId);
     }
     // eslint-disable-next-line
   }, [amountControl]);
@@ -159,6 +178,10 @@ const Widget = () => {
   };
 
   const getPrice = async () => {
+    if (tokenControl.value.symbol === 'USDC') {
+      setIsNotSupportedToken(true);
+      return;
+    }
     setIsFetchingCgtAmount(true);
     try {
       const currencyAmount = CurrencyAmount.fromRawAmount(new Token(config.NETWORK.CHAIN_ID, tokenControl.value.address, decimals as any), JSBI.BigInt(parseUnits(amountControl.value + '', decimals as any)));
@@ -171,8 +194,14 @@ const Widget = () => {
       const wrContract = getContractByName('Wrapper', provider as any);
       const cgtAmt = await wrContract.quoteCGTAmountReceived(parseUnits(quoteAmountOut + '', 6));
       setCgtReceive(cgtAmt);
+      if (cgtAmt?.gte(cgtWrapperBalanceData?.value)) {
+        setIsExceedBalance(true);
+      } else {
+        setIsExceedBalance(false);
+      }
+      setIsNotSupportedToken(false);
     } catch (error) {
-      console.error(error);
+      setIsNotSupportedToken(true);
     } finally {
       setIsFetchingCgtAmount(false);
     }
@@ -287,20 +316,22 @@ const Widget = () => {
         <div className="WidgetHeader">
           {isConnected && chain?.id === config.NETWORK.CHAIN_ID ? <ConnectButton /> : <div></div>}
           <IconButton aria-label="theme" color="primary" size="medium">
-            <LightModeOutlinedIcon fontSize="medium" />
+            {/* <LightModeOutlinedIcon fontSize="medium" /> */}
           </IconButton>
         </div>
         <span className="WidgetTitle">Buying CGT with token</span>
         <div className="WidgetContent">
           <div className="WidgetContentSection">
-            <div className="WidgetBalanceContainer">
-              {balance && symbol && !isFetchingTokenBalance ?
-                <>
-                  <span className="WidgetBalanceText">Balance:</span>
-                  <span className="WidgetBalanceText">{balance.toLocaleString()} {symbol}</span>
-                </> : <Skeleton width={100} height={30} variant="text" />
-              }
-            </div>
+            {isConnected && chain?.id === config.NETWORK.CHAIN_ID ?
+              <div className="WidgetBalanceContainer">
+                {balance && symbol && !isFetchingTokenBalance ?
+                  <>
+                    <span className="WidgetBalanceText">Balance:</span>
+                    <span className="WidgetBalanceText">{balance.toLocaleString()} {symbol}</span>
+                  </> : <Skeleton width={100} height={30} variant="text" />
+                }
+              </div> : <></>
+            }
             <div className="WidgetAmountContainer">
               <Button className="WidgetAmountButton" id="token-dropdown" onClick={openTokensDropdown}>
                 {tokenControl.value ?
@@ -316,7 +347,7 @@ const Widget = () => {
                   <TextField color="secondary"
                     error={isNotEnoughBalance}
                     value={amountControl.value}
-                    disabled={!+balance || disableForm}
+                    // disabled={!+balance || disableForm}
                     type="text"
                     placeholder="Amount"
                     InputProps={{
@@ -358,14 +389,16 @@ const Widget = () => {
             </div>
           </div>
           <div className="WidgetContentSection">
-            <div className="WidgetBalanceContainer">
-              {cgtBalanceData ?
-                <>
-                  <span className="WidgetBalanceText">Balance:</span>
-                  <span className="WidgetBalanceText">{(+formatUnits(cgtBalanceData.value, cgtBalanceData.decimals)).toFixed(3).toLocaleString()} {cgtBalanceData.symbol}</span>
-                </> : <Skeleton width={100} height={30} variant="text" />
-              }
-            </div>
+            {isConnected && chain?.id === config.NETWORK.CHAIN_ID ?
+              <div className="WidgetBalanceContainer">
+                {cgtBalanceData ?
+                  <>
+                    <span className="WidgetBalanceText">Balance:</span>
+                    <span className="WidgetBalanceText">{(+formatUnits(cgtBalanceData.value, cgtBalanceData.decimals)).toFixed(3).toLocaleString()} {cgtBalanceData.symbol}</span>
+                  </> : <Skeleton width={100} height={30} variant="text" />
+                }
+              </div> : <></>
+            }
             <div className="WidgetAmountContainer">
               <div className="WidgetAmountButton">
                 <>
@@ -396,6 +429,9 @@ const Widget = () => {
             </Button> :
             <ConnectButton />
           }
+          {isNotEnoughBalance ? <span className="WidgetErrorMessage">Not enough balance</span> : <></>}
+          {isExceedBalance ? <span className="WidgetErrorMessage">{`Please try again with a lower ${tokenControl.value?.symbol} token amount`}</span> : <></>}
+          {isNotSupportedToken ? <span className="WidgetErrorMessage">Please try again with another token</span> : <></>}
         </div>
       </div>
 
