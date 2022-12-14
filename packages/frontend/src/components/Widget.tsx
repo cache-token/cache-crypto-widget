@@ -7,7 +7,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+// import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowDownwardOutlinedIcon from '@mui/icons-material/ArrowDownwardOutlined';
 
@@ -128,8 +128,12 @@ const Widget = () => {
 
   useEffect(() => {
     if (+amountControl.value) {
+      setIsFetchingCgtAmount(true);
       const timeOutId = setTimeout(() => getPrice(), 500);
       return () => clearTimeout(timeOutId);
+    } else {
+      setCgtReceive(0);
+      setIsFetchingCgtAmount(false);
     }
     // eslint-disable-next-line
   }, [amountControl]);
@@ -182,7 +186,6 @@ const Widget = () => {
       setIsNotSupportedToken(true);
       return;
     }
-    setIsFetchingCgtAmount(true);
     try {
       const currencyAmount = CurrencyAmount.fromRawAmount(new Token(config.NETWORK.CHAIN_ID, tokenControl.value.address, decimals as any), JSBI.BigInt(parseUnits(amountControl.value + '', decimals as any)));
       const route = await uniswapRouter.route(
@@ -347,7 +350,7 @@ const Widget = () => {
                   <TextField color="secondary"
                     error={isNotEnoughBalance}
                     value={amountControl.value}
-                    // disabled={!+balance || disableForm}
+                    disabled={!+balance || disableForm}
                     type="text"
                     placeholder="Amount"
                     InputProps={{
