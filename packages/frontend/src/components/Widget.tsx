@@ -184,6 +184,7 @@ const Widget = () => {
   const getPrice = async () => {
     if (tokenControl.value.symbol === 'USDC') {
       setIsNotSupportedToken(true);
+      setIsFetchingCgtAmount(false);
       return;
     }
     try {
@@ -203,9 +204,9 @@ const Widget = () => {
         setIsExceedBalance(false);
       }
       setIsNotSupportedToken(false);
+      setIsFetchingCgtAmount(false);
     } catch (error) {
       setIsNotSupportedToken(true);
-    } finally {
       setIsFetchingCgtAmount(false);
     }
   }
@@ -336,7 +337,10 @@ const Widget = () => {
               </div> : <></>
             }
             <div className="WidgetAmountContainer">
-              <Button className="WidgetAmountButton" id="token-dropdown" onClick={openTokensDropdown}>
+              <Button className="WidgetAmountButton" id="token-dropdown"
+                onClick={openTokensDropdown}
+                disabled={isFetchingCgtAmount}
+              >
                 {tokenControl.value ?
                   <>
                     <img width={24} height={24} src={tokenControl.value.logoURI} alt="" />
