@@ -400,7 +400,7 @@ const Widget = () => {
                     <span className="WidgetBalanceText">{(+formatUnits(cgtBalanceData.value, cgtBalanceData.decimals)).toFixed(3).toLocaleString()} {cgtBalanceData.symbol}</span>
                   </> : <Skeleton width={100} height={30} variant="text" />
                 }
-              </div> : <></>
+              </div> : <div className="WidgetBalanceContainer"></div>
             }
             <div className="WidgetAmountContainer">
               <div className="WidgetAmountButton">
