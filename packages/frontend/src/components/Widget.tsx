@@ -319,9 +319,9 @@ const Widget = () => {
       <div className="WidgetContainer">
         <div className="WidgetHeader">
           {isConnected && chain?.id === config.NETWORK.CHAIN_ID ? <ConnectButton /> : <div></div>}
-          <IconButton aria-label="theme" color="primary" size="medium">
-            {/* <LightModeOutlinedIcon fontSize="medium" /> */}
-          </IconButton>
+          {/* <IconButton aria-label="theme" color="primary" size="medium">
+            <LightModeOutlinedIcon fontSize="medium" />
+          </IconButton> */}
         </div>
         <span className="WidgetTitle">Buying CGT with token</span>
         <div className="WidgetContent">
@@ -354,14 +354,14 @@ const Widget = () => {
                   <TextField color="secondary"
                     error={isNotEnoughBalance}
                     value={amountControl.value}
-                    disabled={!+balance || disableForm}
+                    disabled={!+balance || disableForm || isFetchingTokenBalance}
                     type="text"
                     placeholder="Amount"
                     InputProps={{
                       endAdornment:
                         <InputAdornment position="end">
                           <Button className="WidgetMaxAmountButton" color="secondary" variant="contained"
-                            disabled={!+balance || disableForm}
+                            disabled={!+balance || disableForm || isFetchingTokenBalance}
                             onClick={() => {
                               if (+balance) {
                                 setAmountControl({

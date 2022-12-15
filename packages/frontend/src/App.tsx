@@ -83,3 +83,7 @@ function App() {
 }
 
 export default App;
+
+(window as any).ethereum?.on('chainChanged', () => {
+  window.location.reload();
+});
