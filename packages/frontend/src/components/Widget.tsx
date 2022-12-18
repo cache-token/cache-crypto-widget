@@ -11,11 +11,11 @@ import ErrorIcon from '@mui/icons-material/Error';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowDownwardOutlinedIcon from '@mui/icons-material/ArrowDownwardOutlined';
 
-import { useAccount, useBalance, useNetwork, useProvider, useSigner } from "wagmi";
+import JSBI from 'jsbi';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useBalance, useNetwork, useProvider, useSigner } from "wagmi";
 import { CurrencyAmount, Token, TradeType } from "@uniswap/sdk-core";
 import { AlphaRouter } from "@uniswap/smart-order-router";
-import JSBI from 'jsbi';
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { TransactionResponse } from "@ethersproject/providers";
 
@@ -49,7 +49,7 @@ const Widget = () => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [disableForm, setDisableForm] = useState<boolean>(false);
   
-  const [decimals, setDecimals] = useState<number>();
+  const [decimals, setDecimals] = useState<number>(0);
   const [confirmationStep, setConfirmationStep] = useState<number>(0);
   const [cgtReceive, setCgtReceive] = useState<number>(0);
 
@@ -64,7 +64,7 @@ const Widget = () => {
 
   const [snackbar, setSnackbar] = useState<ISnackbarConfig>({
     isOpen: false
-  } as any);
+  } as ISnackbarConfig);
 
   const [tokenControl, setTokenControl] = useState<IFormControl>({
     value: '',
@@ -309,7 +309,7 @@ const Widget = () => {
         isOpen: true,
         timeOut: 5000,
         type: 'error',
-        message: 'Transaction failed'
+        message: 'Transaction Failed'
       });
     }
   }
@@ -436,7 +436,7 @@ const Widget = () => {
             </Button> :
             <ConnectButton />
           }
-          {isNotEnoughBalance ? <span className="WidgetErrorMessage">Not enough balance</span> : <></>}
+          {isNotEnoughBalance ? <span className="WidgetErrorMessage">Token balance is currently insufficient</span> : <></>}
           {isExceedBalance ? <span className="WidgetErrorMessage">{`Please try again with a lower ${tokenControl.value?.symbol} token amount`}</span> : <></>}
           {isNotSupportedToken ? <span className="WidgetErrorMessage">Please try again with another token</span> : <></>}
         </div>

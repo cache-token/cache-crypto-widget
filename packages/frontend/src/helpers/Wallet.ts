@@ -1,6 +1,6 @@
-import { ExternalProvider, JsonRpcFetchFunc, Web3Provider } from "@ethersproject/providers";
 import { ethers } from "ethers";
 import { TransactionReceipt } from "@ethersproject/providers";
+import { ExternalProvider, JsonRpcFetchFunc, Web3Provider } from "@ethersproject/providers";
 
 export const getWeb3Provider = (provider: ExternalProvider | JsonRpcFetchFunc) => {
   const library = new Web3Provider(provider);

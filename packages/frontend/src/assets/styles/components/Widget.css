@@ -141,7 +141,6 @@
 }
 
 .WidgetActionsButton {
-  font-family: var(--fontFamily) !important;
   font-size: 1.1rem !important;
   font-weight: 700 !important;
   height: 50px !important;

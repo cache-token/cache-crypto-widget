@@ -6,6 +6,7 @@ import { getDefaultWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbo
 import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
+
 import { IAppConfig } from './models/Base';
 import { getAppConfig } from './helpers/Utilities';
 import Widget from './components/Widget';

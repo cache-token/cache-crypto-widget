@@ -1,7 +1,8 @@
 import { Wallet } from "@ethersproject/wallet";
 import { ethers } from "ethers";
-import { IContract } from "../models/Contract";
 import { isAddress } from "ethers/lib/utils";
+
+import { IContract } from "../models/Contract";
 import { IAppConfig } from "../models/Base";
 import { getAppConfig } from "./Utilities";
 
