@@ -401,7 +401,7 @@ const Widget = () => {
                 {cgtBalanceData ?
                   <>
                     <span className="WidgetBalanceText">Balance:</span>
-                    <span className="WidgetBalanceText">{(+formatUnits(cgtBalanceData.value, cgtBalanceData.decimals)).toFixed(3).toLocaleString()} {cgtBalanceData.symbol}</span>
+                    <span className="WidgetBalanceText">{(+formatUnits(cgtBalanceData.value, cgtBalanceData.decimals)).toFixed(6).toLocaleString()} {cgtBalanceData.symbol}</span>
                   </> : <Skeleton width={100} height={30} variant="text" />
                 }
               </div> : <div className="WidgetBalanceContainer"></div>
