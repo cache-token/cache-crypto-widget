@@ -175,7 +175,7 @@ const Widget = () => {
     const tokenContract = getContractByAddressName(tokenControl.value?.address, 'Token', provider as any);
     const bl = await tokenContract.balanceOf(address);
     const dcm = await tokenContract.decimals();
-    setBalance((+formatUnits(bl, dcm)).toFixed(3));
+    setBalance((formatUnits(bl, dcm)));
     setSymbol(tokenControl.value?.symbol);
     setDecimals(dcm);
     setIsFetchingTokenBalance(false);
