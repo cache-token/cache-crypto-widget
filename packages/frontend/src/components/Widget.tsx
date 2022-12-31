@@ -19,7 +19,6 @@ import { AlphaRouter } from "@uniswap/smart-order-router";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { TransactionResponse } from "@ethersproject/providers";
 
-import cgtImage from '../assets/images/cgt_icon.png';
 import { IFormControl } from "../models/Form";
 import { getAppConfig } from "../helpers/Utilities";
 import { IAppConfig } from "../models/Base";
@@ -29,6 +28,7 @@ import { ISnackbarConfig } from "../models/Material";
 import { IToken } from "../models/Token";
 import { getContractByAddressName, getContractByName } from "../helpers/Contract";
 import { errorHandler, pollingTransaction } from "../helpers/Wallet";
+import cgtImage from '../assets/images/cgt_icon.png';
 
 const Widget = () => {
   const config: IAppConfig = getAppConfig();
@@ -48,7 +48,7 @@ const Widget = () => {
   const [isSwapCompleted, setIsSwapCompleted] = useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [disableForm, setDisableForm] = useState<boolean>(false);
-  
+
   const [decimals, setDecimals] = useState<number>(0);
   const [confirmationStep, setConfirmationStep] = useState<number>(0);
   const [cgtReceive, setCgtReceive] = useState<number>(0);
@@ -188,7 +188,10 @@ const Widget = () => {
       return;
     }
     try {
-      const currencyAmount = CurrencyAmount.fromRawAmount(new Token(config.NETWORK.CHAIN_ID, tokenControl.value.address, decimals as any), JSBI.BigInt(parseUnits(amountControl.value + '', decimals as any)));
+      const currencyAmount = CurrencyAmount.fromRawAmount(
+        new Token(config.NETWORK.CHAIN_ID, tokenControl.value.address, decimals as any),
+        JSBI.BigInt(parseUnits(amountControl.value + '', decimals as any))
+      );
       const route = await uniswapRouter.route(
         currencyAmount,
         new Token(config.NETWORK.CHAIN_ID, config.CONTRACTS_ADDRESS.USDC, 6),
