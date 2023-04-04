@@ -21,7 +21,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 });
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.7",
+  solidity: "0.8.9",
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-        blockNumber: 15306000,
+        blockNumber: 16974164,
         // url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, 
         // blockNumber: 31738000
       },

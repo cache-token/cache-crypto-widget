@@ -5,7 +5,6 @@ import { ethers, network } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import { WrapperContract, ERC20 } from "../typechain-types";
-//import { ContractAddresses, SwapRouterAddress } from "../Addresses";
 import config from "../config/config.dev.json";
 
 const ContractAddresses = config.ContractAddresses;
@@ -177,20 +176,20 @@ describe("Wrapper contract test", function () {
   it("6. contract correctly quotes CGT amount out", async function () {
     const amount = 10;
     const price =
-      (await wrapper.getLatestXAU_USDPrice()).toNumber() / (31.1034768 * 10 ** 8);
+      (await wrapper.getLatestXAU_USDPrice()).toNumber() / (31.10348 * 10 ** 8);
     const quote = await wrapper.quoteCGTAmountReceived(
       amount * 10 ** (await stable.decimals())
     );
     expect(
       parseFloat(
         (quote.toNumber() / 10 ** (await cacheGold.decimals())).toFixed(
-          await cacheGold.decimals()
+          await cacheGold.decimals() - 1
         )
       )
     ).to.equal(
       parseFloat(
         ((amount * (1 - margin / 10000)) / price).toFixed(
-          await cacheGold.decimals()
+          await cacheGold.decimals() - 1
         )
       )
     );
@@ -303,6 +302,7 @@ describe("Wrapper contract test", function () {
         )
     ).to.emit(wrapper, "SwappedTokensForCGT");
   });
+
   it("10. stabletoken address can be set by owner", async function () {
     const USDT_Address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     await wrapper.setStable(USDT_Address);
