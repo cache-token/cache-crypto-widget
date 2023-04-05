@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.9;
+pragma solidity 0.8.17;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -108,7 +108,9 @@ contract CGTSwap is Ownable, Pausable, ReentrancyGuard {
      * @return estimated stablecoin amount out
      */
     function quoteStablecoinAmount(uint256 amountIn) public view returns (uint256) {
-        uint256 stableAmount = (amountIn * uint256(getLatestXAU_USDPrice()) * 3215075) / (10**8 * 10**8);
+        int latestPrice = getLatestXAU_USDPrice();
+        require(latestPrice >= 20 * 10**8 && latestPrice <= 3000 * 10**8, "price feed out of range");
+        uint256 stableAmount = (amountIn * uint256(latestPrice) * 3215075) / (10**8 * 10**8);
         uint256 adjustedAmount = (stableAmount / DECIMAL_FACTOR) + round(stableAmount, DECIMAL_FACTOR);
         uint256 netStablecoinAmount = (adjustedAmount * (10000 - margin)) / 10000;
         return netStablecoinAmount;
