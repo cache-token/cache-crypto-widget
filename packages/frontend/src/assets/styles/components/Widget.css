@@ -1,0 +1,162 @@
+.WidgetContainer {
+  background: #101213;
+  border-radius: .75rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+  max-width: 463px;
+  width: 100%;
+}
+
+.WidgetHeader {
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.WidgetTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: left;
+  width: 100%;
+}
+
+.WidgetContent {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  width: 100%;
+}
+
+.WidgetContentSection {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(247, 182, 0, 0.5);
+  border-radius: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 1rem;
+  width: 100%;
+}
+
+.WidgetArrowDownContainer {
+  position: relative;
+  width: 100%;
+}
+
+.WidgetArrowDown {
+  background: #101213;
+  border-radius: 6px;
+  display: flex;
+  height: 40px;
+  padding: .25rem;
+  position: absolute;
+  right: 46%;
+  top: -15px;
+  width: 40px;
+}
+
+.WidgetArrowDownInner {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.WidgetBalanceContainer {
+  align-items: center;
+  display: flex;
+  gap: .15rem;
+  justify-content: flex-end;
+  min-height: 13px;
+  width: 100%;
+}
+
+.WidgetBalanceText {
+  color: #F7B600;
+  font-size: .75rem;
+  font-weight: 500;
+}
+
+.WidgetAmountButton {
+  align-items: center !important;
+  display: flex !important;
+  gap: .25rem !important;
+  padding: .35rem !important;
+  min-width: 100px !important;
+}
+
+.WidgetAmountButtonText {
+  color: #FFFFFF;
+  font-size: .85rem;
+  font-weight: 400;
+}
+
+.WidgetAmountContainer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  width: 100%;
+}
+
+.WidgetAmountControl {
+  background: #101213;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.WidgetMaxAmountButton {
+  border-radius: .25rem !important;
+  color: #000000 !important;
+  font-size: .75rem !important;
+  padding: 5px 10px !important;
+}
+
+.WidgetCGTAmount {
+  align-items: center;
+  display: flex;
+  height: 58.3px;
+  padding: 16.5px 14px;
+  width: 100%;
+}
+
+.WidgetCGTAmountText {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.WidgetActions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.WidgetActionsButton {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  height: 50px !important;
+  text-transform: none !important;
+  width: 200px !important;
+}
+
+.WidgetTokenDropdown {
+  max-height: 300px !important;
+}
+
+.WidgetContainer img {
+  border-radius: 50%;
+}
+
+.WidgetErrorMessage {
+  color: #d32f2f;
+  font-size: .8rem;
+}
