@@ -303,18 +303,18 @@ const Widget = () => {
                   <TextField color="secondary"
                     error={isNotEnoughBalance}
                     value={amountControl.value}
-                    disabled={(cgtBalanceData && !+cgtBalanceData?.value) || disableForm}
+                    disabled={(cgtBalanceData && !+cgtBalanceData?.value) || disableForm || !isConnected || chain?.unsupported}
                     type="text"
                     placeholder="Amount"
                     InputProps={{
                       endAdornment:
                         <InputAdornment position="end">
                           <Button className="WidgetMaxAmountButton" color="secondary" variant="contained"
-                            disabled={(cgtBalanceData && !+cgtBalanceData?.value) || disableForm}
+                            disabled={(cgtBalanceData && !+cgtBalanceData?.value) || disableForm || !isConnected || chain?.unsupported}
                             onClick={() => {
                               if (cgtBalanceData && +cgtBalanceData?.value) {
                                 setAmountControl({
-                                  value: +formatUnits(cgtBalanceData?.value, cgtBalanceData.decimals),
+                                  value: formatUnits(cgtBalanceData?.value, cgtBalanceData.decimals),
                                   invalid: false
                                 });
                               } else {
