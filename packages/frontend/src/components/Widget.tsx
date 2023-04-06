@@ -375,7 +375,7 @@ const Widget = () => {
         <div className="WidgetActions">
           {isConnected && chain?.id === config.NETWORK.CHAIN_ID ?
             <Button className="WidgetActionsButton" color="secondary" variant="contained"
-              disabled={!isFormValid || disableForm}
+              disabled={!isFormValid || disableForm || isFetching}
               onClick={approveCGT}>
               {disableForm ?
                 <CircularProgress color="secondary" size={25} /> : <></>
