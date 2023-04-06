@@ -87,7 +87,7 @@
   display: flex !important;
   gap: .25rem !important;
   padding: .35rem !important;
-  min-width: 100px !important;
+  min-width: 80px !important;
 }
 
 .WidgetAmountButtonText {
