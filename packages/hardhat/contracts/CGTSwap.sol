@@ -145,7 +145,6 @@ contract CGTSwap is Ownable, Pausable, ReentrancyGuard {
         uint256 amountOut = quoteStablecoinAmount(amountIn);
         totalFeeCollected += (amountOut *  margin) / (10000 - margin);
 
-        require(amountOut <= stable.balanceOf(address(this)), "Insufficient stablecoin available");
         TransferHelper.safeTransfer(address(stable), msg.sender, amountOut);
         emit SwappedCGTForStable(msg.sender, address(stable), amountIn);
     }
