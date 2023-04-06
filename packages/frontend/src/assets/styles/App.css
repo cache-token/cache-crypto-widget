@@ -1,0 +1,10 @@
+.AppContainer {
+  align-items: center;
+  background: #1E1E1E;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+}
