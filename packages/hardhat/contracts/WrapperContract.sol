@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity 0.8.17;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -129,7 +129,7 @@ contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
         uint256 amountOut = swapRouter.exactInputSingle(params);
         totalFeesCollected += (amountOut * margin) / 10000;
         uint256 netStableTokenAmount = (amountOut * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        uint256 CGTAmount = (netStableTokenAmount * 3110348 * (10**5)) / uint256(getLatestXAU_USDPrice());
 
         TransferHelper.safeTransfer(address(CGT), msg.sender, CGTAmount);
         emit SwappedTokensForCGT(msg.sender, tokenIn, CGTAmount);
@@ -153,7 +153,7 @@ contract WrapperContract is Ownable, Pausable, ReentrancyGuard {
      */
     function quoteCGTAmountReceived(uint256 stableAmountIn) external view returns (uint256) {
         uint256 netStableTokenAmount = (stableAmountIn * (10000 - margin)) / 10000;
-        uint256 CGTAmount = (netStableTokenAmount * 2834952 * (10**5)) / uint256(getLatestXAU_USDPrice());
+        uint256 CGTAmount = (netStableTokenAmount * 3110348 * (10**5)) / uint256(getLatestXAU_USDPrice());
         return CGTAmount;
     }
 
