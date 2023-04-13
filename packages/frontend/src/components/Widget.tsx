@@ -185,10 +185,7 @@ const Widget = () => {
       approveCgtWrite?.({
         recklesslySetUnpreparedArgs: [
           config.CONTRACTS_ADDRESS.CGTSwap,
-          parseUnits(amountControl.value.toString(), cgtBalanceData?.decimals),
-          {
-            gasLimit: 100000
-          }
+          parseUnits(amountControl.value.toString(), cgtBalanceData?.decimals)
         ]
       });
     }
@@ -225,10 +222,7 @@ const Widget = () => {
     setConfirmationMessage('Waiting for transaction confirmation...');
     swapWrite?.({
       recklesslySetUnpreparedArgs: [
-        parseUnits(amountControl.value, cgtBalanceData?.decimals),
-        {
-          gasLimit: 300000
-        }
+        parseUnits(amountControl.value, cgtBalanceData?.decimals)
       ]
     });
   }
