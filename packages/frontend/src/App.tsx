@@ -33,7 +33,7 @@ const theme = createTheme({
 });
 
 const { chains, provider } = configureChains(
-  [chain.goerli],
+  config.NETWORK.CHAIN_ID === 1 ? [chain.mainnet] : [chain.goerli],
   [
     alchemyProvider({ apiKey: config.NETWORK.ALCHEMY_API_KEY }),
     publicProvider()

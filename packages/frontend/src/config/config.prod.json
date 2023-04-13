@@ -1,14 +1,14 @@
 {
   "NETWORK": {
-    "CHAIN_ID": 5,
-    "NAME": "Goerli Testnet",
-    "RPC_URL": "https://eth-goerli.g.alchemy.com/v2/KSMix3DFlS4-Mk34sK1AJGEllu5NYx-F",
-    "BLOCK_EXPLORER": "https://goerli.etherscan.io/",
-    "ALCHEMY_API_KEY": "KSMix3DFlS4-Mk34sK1AJGEllu5NYx-F"
+    "CHAIN_ID": 1,
+    "NAME": "Ethereum",
+    "RPC_URL": "https://eth-mainnet.g.alchemy.com/v2/Ww5JKEnPGw9pWHxCn66tyo-7D9UGP678",
+    "BLOCK_EXPLORER": "https://etherscan.io/",
+    "ALCHEMY_API_KEY": "Ww5JKEnPGw9pWHxCn66tyo-7D9UGP678"
   },
   "CONTRACTS_ADDRESS": {
-    "CGT": "0x268F78793F20B11615eD5C4e076B288826E299ce",
-    "USDC": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
-    "CGTSwap": "0xbfa2C1fE12f7df5bF65cA273e15775e224a5c878"
+    "CGT": "0xF5238462E7235c7B62811567E63Dd17d12C2EAA0",
+    "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "CGTSwap": "0x42B55438642b48513218504f595f1E1b6dEf1fbE"
   }
 }
