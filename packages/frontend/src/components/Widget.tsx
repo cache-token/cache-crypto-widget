@@ -29,6 +29,7 @@ const Widget = () => {
   const { data: signer } = useSigner();
 
   const [isNotEnoughBalance, setIsNotEnoughBalance] = useState<boolean>(false);
+  const [isExceedBalance, setIsExceedBalance] = useState<boolean>(false);
   const [isConfirmation, setIsConfirmation] = useState<boolean>(false);
   const [isTryAgain, setIsTryAgain] = useState<boolean>(false);
   const [isSwapCompleted, setIsSwapCompleted] = useState<boolean>(false);
@@ -82,6 +83,13 @@ const Widget = () => {
     watch: true
   });
 
+  const { data: usdcContractBalanceData } = useBalance({
+    addressOrName: config.CONTRACTS_ADDRESS.CGTSwap,
+    token: config.CONTRACTS_ADDRESS.USDC,
+    chainId: config.NETWORK.CHAIN_ID,
+    watch: true
+  });
+
   const {
     data: swapResult, error: swapError, write: swapWrite
   } = useContractWrite({
@@ -96,6 +104,11 @@ const Widget = () => {
     const usdcAmount = await cgtSwapContract.quoteStablecoinAmount(parseUnits(amountControl.value, cgtBalanceData?.decimals));
     setUsdcReceive(+formatUnits(usdcAmount, usdcBalanceData?.decimals));
     setIsFetching(false);
+    if (usdcContractBalanceData && usdcAmount.gte(usdcContractBalanceData.value)) {
+      setIsExceedBalance(true)
+    } else {
+      setIsExceedBalance(false)
+    }
   }
 
   useEffect(() => {
@@ -185,10 +198,7 @@ const Widget = () => {
       approveCgtWrite?.({
         recklesslySetUnpreparedArgs: [
           config.CONTRACTS_ADDRESS.CGTSwap,
-          parseUnits(amountControl.value.toString(), cgtBalanceData?.decimals),
-          {
-            gasLimit: 100000
-          }
+          parseUnits(amountControl.value.toString(), cgtBalanceData?.decimals)
         ]
       });
     }
@@ -225,10 +235,7 @@ const Widget = () => {
     setConfirmationMessage('Waiting for transaction confirmation...');
     swapWrite?.({
       recklesslySetUnpreparedArgs: [
-        parseUnits(amountControl.value, cgtBalanceData?.decimals),
-        {
-          gasLimit: 300000
-        }
+        parseUnits(amountControl.value, cgtBalanceData?.decimals)
       ]
     });
   }
@@ -375,7 +382,7 @@ const Widget = () => {
         <div className="WidgetActions">
           {isConnected && chain?.id === config.NETWORK.CHAIN_ID ?
             <Button className="WidgetActionsButton" color="secondary" variant="contained"
-              disabled={!isFormValid || disableForm || isFetching}
+              disabled={!isFormValid || disableForm || isFetching || isExceedBalance}
               onClick={approveCGT}>
               {disableForm ?
                 <CircularProgress color="secondary" size={25} /> : <></>
@@ -385,6 +392,7 @@ const Widget = () => {
             <ConnectButton />
           }
           {isNotEnoughBalance ? <span className="WidgetErrorMessage">Token balance is currently insufficient</span> : <></>}
+          {isExceedBalance ? <span className="WidgetErrorMessage">Please try again with a lower CGT amount</span> : <></>}
         </div>
       </div>
 
